@@ -1,11 +1,10 @@
-
 import { useState } from "react";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Input } from "@/components/ui/input";
-import { UserPlus, Search, Video, Phone, SendHorizontal, Paperclip, Smile } from "lucide-react";
+import { UserPlus, Search, Video, Phone, SendHorizontal, Paperclip, Smile, MessageSquare } from "lucide-react";
 import PageContent from "@/components/PageContent";
 
 const Messages = () => {
@@ -212,6 +211,14 @@ const Messages = () => {
           )}
         </div>
       </Card>
+      
+      {/* AI Assistant Button */}
+      <div className="mt-4 text-center">
+        <Button className="bg-accent text-accent-foreground">
+          <MessageSquare className="h-4 w-4 mr-2" />
+          AI Assistant
+        </Button>
+      </div>
     </Layout>
   );
 };
