@@ -1,10 +1,11 @@
 
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
-import { BookOpen, Video, MessageSquare, ClipboardList, Calendar, Users, Shield } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 const Index = () => {
+  const { isAuthenticated } = useAuth();
+  
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-gray-50">
       {/* Hero Section */}
@@ -14,12 +15,15 @@ const Index = () => {
             <span className="text-brand-blue font-bold text-xl">EduConnect</span>
           </div>
           <div className="flex space-x-2">
-            <Link to="/dashboard">
-              <Button variant="outline">Login</Button>
-            </Link>
-            <Link to="/dashboard">
-              <Button>Sign Up</Button>
-            </Link>
+            {isAuthenticated ? (
+              <Link to="/dashboard">
+                <Button>Dashboard</Button>
+              </Link>
+            ) : (
+              <Link to="/login">
+                <Button>Login</Button>
+              </Link>
+            )}
           </div>
         </div>
       </header>
@@ -29,7 +33,7 @@ const Index = () => {
           Virtual Classroom for <span className="text-brand-blue">Modern Education</span>
         </h1>
         <div className="flex flex-col sm:flex-row justify-center gap-4">
-          <Link to="/dashboard">
+          <Link to={isAuthenticated ? "/dashboard" : "/login"}>
             <Button size="lg" className="w-full sm:w-auto">Get Started</Button>
           </Link>
         </div>
@@ -39,7 +43,7 @@ const Index = () => {
       <section className="py-20 bg-brand-blue text-white">
         <div className="container mx-auto px-4 text-center">
           <h2 className="text-3xl font-bold mb-6">Ready to Transform Your Learning Experience?</h2>
-          <Link to="/dashboard">
+          <Link to={isAuthenticated ? "/dashboard" : "/login"}>
             <Button size="lg" variant="secondary">Get Started for Free</Button>
           </Link>
         </div>
