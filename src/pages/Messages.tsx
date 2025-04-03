@@ -10,8 +10,10 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Mic, Phone, Video, MoreVertical, Send, UserPlus, PlusCircle } from "lucide-react";
+import { Mic, Phone, Video, MoreVertical, Send, UserPlus, PlusCircle, Trash, X } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import AIAssistantButton from "@/components/AIAssistantButton";
+import { toast } from "@/hooks/use-toast";
 
 const Messages = () => {
   const [activeContact, setActiveContact] = useState<string | null>(null);
@@ -38,6 +40,8 @@ const Messages = () => {
   const [showCreateGroup, setShowCreateGroup] = useState(false);
   const [groupName, setGroupName] = useState("");
   const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
+  const [showAddContact, setShowAddContact] = useState(false);
+  const [newContactEmail, setNewContactEmail] = useState("");
   
   const handleSendMessage = () => {
     if (newMessage.trim() === "" || !activeContact) return;
@@ -104,6 +108,58 @@ const Messages = () => {
     }
   };
 
+  const deleteContact = (contactName: string) => {
+    const updatedMessages = {...messages};
+    delete updatedMessages[contactName];
+    setMessages(updatedMessages);
+    
+    if (activeContact === contactName) {
+      setActiveContact(null);
+    }
+    
+    toast({
+      title: "Contact deleted",
+      description: `${contactName} has been removed from your contacts.`,
+    });
+  };
+
+  const addContactByEmail = () => {
+    if (newContactEmail.trim() === "") return;
+    
+    // In a real app, this would verify the email and add the contact
+    // For demo purposes, we'll create a mock contact
+    const contactName = newContactEmail.split('@')[0].split('.').map(
+      name => name.charAt(0).toUpperCase() + name.slice(1)
+    ).join(' ');
+    
+    if (messages[contactName]) {
+      toast({
+        title: "Contact already exists",
+        description: "This contact is already in your list.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    const updatedMessages = {...messages};
+    updatedMessages[contactName] = [
+      { 
+        text: `Contact added via email: ${newContactEmail}`, 
+        sender: "user", 
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      }
+    ];
+    
+    setMessages(updatedMessages);
+    setShowAddContact(false);
+    setNewContactEmail("");
+    
+    toast({
+      title: "Contact added",
+      description: `${contactName} has been added to your contacts.`,
+    });
+  };
+
   return (
     <Layout title="Messages">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 h-[calc(100vh-10rem)]">
@@ -114,33 +170,81 @@ const Messages = () => {
               <TabsTrigger value="groups">Group Chats</TabsTrigger>
             </TabsList>
             <TabsContent value="direct" className="p-0 h-[calc(100vh-14rem)]">
-              <ScrollArea className="h-full">
+              <div className="flex justify-between items-center p-3">
+                <h3 className="font-medium">Contacts</h3>
+                <Dialog open={showAddContact} onOpenChange={setShowAddContact}>
+                  <DialogTrigger asChild>
+                    <Button variant="ghost" size="sm">
+                      <UserPlus className="h-4 w-4" />
+                      <span className="ml-1">Add</span>
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Add Contact by Email</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="contact-email">Gmail Address</Label>
+                        <Input 
+                          id="contact-email" 
+                          type="email"
+                          placeholder="example@gmail.com" 
+                          value={newContactEmail}
+                          onChange={e => setNewContactEmail(e.target.value)}
+                        />
+                      </div>
+                      <Button 
+                        className="w-full" 
+                        onClick={addContactByEmail}
+                        disabled={newContactEmail.trim() === ""}
+                      >
+                        Add Contact
+                      </Button>
+                    </div>
+                  </DialogContent>
+                </Dialog>
+              </div>
+              <ScrollArea className="h-[calc(100vh-18rem)]">
                 <div className="space-y-2 p-2">
                   {Object.keys(messages).filter(name => !name.includes("Group")).map(contact => (
                     <div 
                       key={contact}
-                      className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer hover:bg-secondary transition-colors ${activeContact === contact ? 'bg-secondary' : ''}`}
-                      onClick={() => setActiveContact(contact)}
+                      className={`flex items-center justify-between p-3 rounded-lg hover:bg-secondary transition-colors ${activeContact === contact ? 'bg-secondary' : ''}`}
                     >
-                      <Avatar>
-                        <AvatarImage src={`https://i.pravatar.cc/150?u=${contact}`} />
-                        <AvatarFallback>{contact.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                      </Avatar>
-                      <div className="flex-1 overflow-hidden">
-                        <div className="flex justify-between items-center">
-                          <h4 className="text-sm font-medium">{contact}</h4>
-                          <span className="text-xs text-muted-foreground">{
-                            messages[contact] && messages[contact].length > 0 
-                              ? messages[contact][messages[contact].length - 1].timestamp 
-                              : ''
-                          }</span>
+                      <div 
+                        className="flex items-center gap-3 flex-1 cursor-pointer"
+                        onClick={() => setActiveContact(contact)}
+                      >
+                        <Avatar>
+                          <AvatarImage src={`https://i.pravatar.cc/150?u=${contact}`} />
+                          <AvatarFallback>{contact.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex-1 overflow-hidden">
+                          <div className="flex justify-between items-center">
+                            <h4 className="text-sm font-medium">{contact}</h4>
+                            <span className="text-xs text-muted-foreground">{
+                              messages[contact] && messages[contact].length > 0 
+                                ? messages[contact][messages[contact].length - 1].timestamp 
+                                : ''
+                            }</span>
+                          </div>
+                          <p className="text-xs text-muted-foreground truncate">
+                            {messages[contact] && messages[contact].length > 0 
+                              ? messages[contact][messages[contact].length - 1].text 
+                              : 'No messages yet'}
+                          </p>
                         </div>
-                        <p className="text-xs text-muted-foreground truncate">
-                          {messages[contact] && messages[contact].length > 0 
-                            ? messages[contact][messages[contact].length - 1].text 
-                            : 'No messages yet'}
-                        </p>
                       </div>
+                      <Button 
+                        variant="ghost" 
+                        size="icon" 
+                        className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                        onClick={() => deleteContact(contact)}
+                        title="Delete contact"
+                      >
+                        <Trash className="h-4 w-4" />
+                      </Button>
                     </div>
                   ))}
                 </div>
@@ -156,28 +260,41 @@ const Messages = () => {
                     {Object.keys(messages).filter(name => name.includes("Group") || name.includes("Study")).map(group => (
                       <div 
                         key={group}
-                        className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer hover:bg-secondary transition-colors ${activeContact === group ? 'bg-secondary' : ''}`}
-                        onClick={() => setActiveContact(group)}
+                        className={`flex items-center justify-between p-3 rounded-lg hover:bg-secondary transition-colors ${activeContact === group ? 'bg-secondary' : ''}`}
                       >
-                        <Avatar>
-                          <AvatarImage src={`https://i.pravatar.cc/150?u=${group}`} />
-                          <AvatarFallback>{group.split(' ').map(n => n[0]).join('')}</AvatarFallback>
-                        </Avatar>
-                        <div className="flex-1 overflow-hidden">
-                          <div className="flex justify-between items-center">
-                            <h4 className="text-sm font-medium">{group}</h4>
-                            <span className="text-xs text-muted-foreground">{
-                              messages[group] && messages[group].length > 0 
-                                ? messages[group][messages[group].length - 1].timestamp 
-                                : ''
-                            }</span>
+                        <div 
+                          className="flex items-center gap-3 flex-1 cursor-pointer"
+                          onClick={() => setActiveContact(group)}
+                        >
+                          <Avatar>
+                            <AvatarImage src={`https://i.pravatar.cc/150?u=${group}`} />
+                            <AvatarFallback>{group.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1 overflow-hidden">
+                            <div className="flex justify-between items-center">
+                              <h4 className="text-sm font-medium">{group}</h4>
+                              <span className="text-xs text-muted-foreground">{
+                                messages[group] && messages[group].length > 0 
+                                  ? messages[group][messages[group].length - 1].timestamp 
+                                  : ''
+                              }</span>
+                            </div>
+                            <p className="text-xs text-muted-foreground truncate">
+                              {messages[group] && messages[group].length > 0 
+                                ? messages[group][messages[group].length - 1].text 
+                                : 'No messages yet'}
+                            </p>
                           </div>
-                          <p className="text-xs text-muted-foreground truncate">
-                            {messages[group] && messages[group].length > 0 
-                              ? messages[group][messages[group].length - 1].text 
-                              : 'No messages yet'}
-                          </p>
                         </div>
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-8 w-8 text-muted-foreground hover:text-destructive"
+                          onClick={() => deleteContact(group)}
+                          title="Delete group"
+                        >
+                          <Trash className="h-4 w-4" />
+                        </Button>
                       </div>
                     ))}
                   </div>
@@ -264,10 +381,20 @@ const Messages = () => {
                 </div>
                 
                 <div className="flex items-center gap-2">
-                  <Button variant="ghost" size="icon" onClick={startAudioCall}>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    onClick={startAudioCall}
+                    disabled={isVideoCallActive || isAudioCallActive}
+                  >
                     <Phone className="h-5 w-5" />
                   </Button>
-                  <Button variant="ghost" size="icon" onClick={startVideoCall}>
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    onClick={startVideoCall}
+                    disabled={isVideoCallActive || isAudioCallActive}
+                  >
                     <Video className="h-5 w-5" />
                   </Button>
                   <Button variant="ghost" size="icon">
@@ -358,10 +485,7 @@ const Messages = () => {
       </div>
       
       <div className="mt-6 flex justify-center">
-        <Button variant="outline" className="w-full max-w-md">
-          <UserPlus className="mr-2 h-4 w-4" />
-          AI Assistant
-        </Button>
+        <AIAssistantButton />
       </div>
     </Layout>
   );
