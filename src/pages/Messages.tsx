@@ -1,597 +1,368 @@
 
 import { useState } from "react";
 import Layout from "@/components/Layout";
-import PageContent from "@/components/PageContent";
-import { 
-  MessageSquare, 
-  UserCircle, 
-  Users, 
-  Plus, 
-  Search, 
-  Phone,
-  Video,
-  MoreVertical,
-  Send,
-  Paperclip,
-  Mic
-} from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Separator } from "@/components/ui/separator";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
+import { Input } from "@/components/ui/input";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
-import { Card } from "@/components/ui/card";
-import AIAssistantButton from "@/components/AIAssistantButton";
-import { toast } from "@/components/ui/use-toast";
-
-interface Message {
-  id: number;
-  content: string;
-  sender: string;
-  timestamp: string;
-  isCurrentUser: boolean;
-}
-
-interface Contact {
-  id: number;
-  name: string;
-  avatar: string;
-  status: "online" | "offline";
-  lastMessage?: string;
-  lastMessageTime?: string;
-  unreadCount?: number;
-}
-
-interface GroupChat {
-  id: number;
-  name: string;
-  avatar: string;
-  members: number;
-  lastMessage?: string;
-  lastMessageTime?: string;
-  unreadCount?: number;
-}
+import { Label } from "@/components/ui/label";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
+import { Mic, Phone, Video, MoreVertical, Send, UserPlus, PlusCircle } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 const Messages = () => {
-  const [activeChat, setActiveChat] = useState<Contact | GroupChat | null>(null);
-  const [messageInput, setMessageInput] = useState("");
-  const [chatMessages, setChatMessages] = useState<Message[]>([]);
+  const [activeContact, setActiveContact] = useState<string | null>(null);
+  const [messages, setMessages] = useState<{[key: string]: {text: string, sender: 'user' | 'contact', timestamp: string}[]}>({
+    "Dr. Sarah Johnson": [
+      { text: "Hello! How are your studies going?", sender: "contact", timestamp: "10:30 AM" },
+      { text: "Great! I've been working on the final project.", sender: "user", timestamp: "10:32 AM" },
+      { text: "Would you be available for a quick video call tomorrow?", sender: "contact", timestamp: "10:34 AM" },
+    ],
+    "Michael Chen": [
+      { text: "Did you complete the assignment?", sender: "contact", timestamp: "Yesterday" },
+      { text: "Yes, just submitted it!", sender: "user", timestamp: "Yesterday" },
+      { text: "Great! Let's review it during our study group.", sender: "contact", timestamp: "Yesterday" },
+    ],
+    "Study Group 101": [
+      { text: "When are we meeting next?", sender: "contact", timestamp: "2 days ago" },
+      { text: "How about Thursday at 3 PM?", sender: "user", timestamp: "2 days ago" },
+      { text: "Works for me!", sender: "contact", timestamp: "2 days ago" },
+    ]
+  });
+  const [newMessage, setNewMessage] = useState("");
   const [isVideoCallActive, setIsVideoCallActive] = useState(false);
-  const [isNewGroupDialogOpen, setIsNewGroupDialogOpen] = useState(false);
-  const [newGroupName, setNewGroupName] = useState("");
-  const [searchQuery, setSearchQuery] = useState("");
-
-  // Mock data
-  const contacts: Contact[] = [
-    {
-      id: 1,
-      name: "Dr. Johnson",
-      avatar: "https://i.pravatar.cc/150?img=1",
-      status: "online",
-      lastMessage: "Don't forget about the assignment due tomorrow!",
-      lastMessageTime: "10:45 AM",
-      unreadCount: 2
-    },
-    {
-      id: 2,
-      name: "Sarah Wilson",
-      avatar: "https://i.pravatar.cc/150?img=2",
-      status: "offline",
-      lastMessage: "Thanks for your help with the physics problem.",
-      lastMessageTime: "Yesterday"
-    },
-    {
-      id: 3,
-      name: "Michael Chen",
-      avatar: "https://i.pravatar.cc/150?img=3",
-      status: "online",
-      lastMessage: "Are you coming to the study session tonight?",
-      lastMessageTime: "2:30 PM",
-      unreadCount: 1
-    },
-    {
-      id: 4,
-      name: "Prof. Martinez",
-      avatar: "https://i.pravatar.cc/150?img=4",
-      status: "offline",
-      lastMessage: "Office hours are cancelled tomorrow.",
-      lastMessageTime: "Monday"
-    }
-  ];
-
-  const groups: GroupChat[] = [
-    {
-      id: 101,
-      name: "Physics Study Group",
-      avatar: "https://i.pravatar.cc/150?img=10",
-      members: 8,
-      lastMessage: "Let's meet in the library at 7 PM.",
-      lastMessageTime: "3:15 PM",
-      unreadCount: 5
-    },
-    {
-      id: 102,
-      name: "Math 101 Class",
-      avatar: "https://i.pravatar.cc/150?img=15",
-      members: 25,
-      lastMessage: "Does anyone have the notes from today's lecture?",
-      lastMessageTime: "Yesterday"
-    },
-    {
-      id: 103,
-      name: "CS Project Team",
-      avatar: "https://i.pravatar.cc/150?img=12",
-      members: 4,
-      lastMessage: "I've pushed the latest changes to the repo.",
-      lastMessageTime: "Monday",
-      unreadCount: 3
-    }
-  ];
-
-  // Filter contacts and groups based on search query
-  const filteredContacts = contacts.filter(contact => 
-    contact.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const [isAudioCallActive, setIsAudioCallActive] = useState(false);
+  const [showCreateGroup, setShowCreateGroup] = useState(false);
+  const [groupName, setGroupName] = useState("");
+  const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
   
-  const filteredGroups = groups.filter(group => 
-    group.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
-
   const handleSendMessage = () => {
-    if (!messageInput.trim() || !activeChat) return;
+    if (newMessage.trim() === "" || !activeContact) return;
     
-    const newMessage: Message = {
-      id: chatMessages.length + 1,
-      content: messageInput.trim(),
-      sender: "You",
-      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-      isCurrentUser: true
-    };
+    const updatedMessages = {...messages};
+    if (!updatedMessages[activeContact]) {
+      updatedMessages[activeContact] = [];
+    }
     
-    setChatMessages([...chatMessages, newMessage]);
-    setMessageInput("");
-    
-    // Simulate a response after a short delay
-    setTimeout(() => {
-      const responseMessage: Message = {
-        id: chatMessages.length + 2,
-        content: `This is a simulated response from ${activeChat.name}`,
-        sender: activeChat.name,
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-        isCurrentUser: false
-      };
-      
-      setChatMessages(prev => [...prev, responseMessage]);
-    }, 2000);
-  };
-
-  const handleChatSelect = (chat: Contact | GroupChat) => {
-    setActiveChat(chat);
-    
-    // Generate mock conversation for the selected chat
-    const mockConversation: Message[] = [
-      {
-        id: 1,
-        content: `Hello! How are you doing today?`,
-        sender: chat.name,
-        timestamp: "9:30 AM",
-        isCurrentUser: false
-      },
-      {
-        id: 2,
-        content: "I'm doing well, thanks for asking! How about you?",
-        sender: "You",
-        timestamp: "9:32 AM",
-        isCurrentUser: true
-      },
-      {
-        id: 3,
-        content: "I'm great! Just working on some course materials.",
-        sender: chat.name,
-        timestamp: "9:35 AM",
-        isCurrentUser: false
-      },
-      {
-        id: 4,
-        content: "Let me know if you need any help with your studies or have questions about the assignments.",
-        sender: chat.name,
-        timestamp: "9:36 AM",
-        isCurrentUser: false
-      }
-    ];
-    
-    setChatMessages(mockConversation);
-  };
-
-  const startVideoCall = () => {
-    if (!activeChat) return;
-    
-    setIsVideoCallActive(true);
-    toast({
-      title: "Starting video call",
-      description: `Connecting to a call with ${activeChat.name}...`,
+    updatedMessages[activeContact].push({
+      text: newMessage,
+      sender: "user",
+      timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
     });
     
-    // Simulate a failed call after a delay (in real app, this would connect to actual WebRTC or similar)
-    setTimeout(() => {
-      setIsVideoCallActive(false);
-      toast({
-        title: "Call ended",
-        description: "The call has ended. You can try again later.",
-      });
-    }, 5000);
+    setMessages(updatedMessages);
+    setNewMessage("");
+  };
+
+  const handleKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === "Enter") {
+      handleSendMessage();
+    }
+  };
+  
+  const startVideoCall = () => {
+    setIsVideoCallActive(true);
+    setIsAudioCallActive(false);
   };
   
   const startAudioCall = () => {
-    if (!activeChat) return;
-    
-    toast({
-      title: "Starting audio call",
-      description: `Connecting to a call with ${activeChat.name}...`,
-    });
-    
-    // Simulate a failed call after a delay
-    setTimeout(() => {
-      toast({
-        title: "Call failed",
-        description: "Could not connect the call. Please check your internet connection and try again.",
-        variant: "destructive",
-      });
-    }, 3000);
+    setIsAudioCallActive(true);
+    setIsVideoCallActive(false);
   };
-
+  
+  const endCall = () => {
+    setIsVideoCallActive(false);
+    setIsAudioCallActive(false);
+  };
+  
   const createNewGroup = () => {
-    if (!newGroupName.trim()) {
-      toast({
-        title: "Group name required",
-        description: "Please enter a name for your group",
-        variant: "destructive",
-      });
-      return;
+    if (groupName.trim() === "" || selectedMembers.length === 0) return;
+    
+    const updatedMessages = {...messages};
+    updatedMessages[groupName] = [
+      { 
+        text: `Group "${groupName}" created with ${selectedMembers.join(", ")}`, 
+        sender: "user", 
+        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
+      }
+    ];
+    
+    setMessages(updatedMessages);
+    setShowCreateGroup(false);
+    setGroupName("");
+    setSelectedMembers([]);
+  };
+  
+  const toggleMember = (name: string) => {
+    if (selectedMembers.includes(name)) {
+      setSelectedMembers(selectedMembers.filter(member => member !== name));
+    } else {
+      setSelectedMembers([...selectedMembers, name]);
     }
-    
-    toast({
-      title: "Group created",
-      description: `${newGroupName} has been created successfully`,
-    });
-    
-    setNewGroupName("");
-    setIsNewGroupDialogOpen(false);
   };
 
   return (
     <Layout title="Messages">
-      <div className="bg-white rounded-lg shadow overflow-hidden h-[calc(100vh-210px)]">
-        <div className="flex h-full">
-          {/* Chat sidebar */}
-          <div className="w-80 border-r flex flex-col">
-            <div className="p-4 border-b">
-              <Input
-                placeholder="Search messages..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full"
-                prefix={<Search className="h-4 w-4 text-gray-400" />}
-              />
-            </div>
-            
-            <Tabs defaultValue="direct" className="flex-1 flex flex-col">
-              <TabsList className="grid grid-cols-2 mx-4 mt-2">
-                <TabsTrigger value="direct">
-                  <UserCircle className="h-4 w-4 mr-2" />
-                  Direct
-                </TabsTrigger>
-                <TabsTrigger value="groups">
-                  <Users className="h-4 w-4 mr-2" />
-                  Groups
-                </TabsTrigger>
-              </TabsList>
-              
-              <TabsContent value="direct" className="flex-1 overflow-y-auto">
-                <div className="px-2 space-y-1">
-                  {filteredContacts.map((contact) => (
-                    <button
-                      key={contact.id}
-                      className={`w-full flex items-center p-2 rounded-md hover:bg-gray-100 ${
-                        activeChat?.id === contact.id ? 'bg-gray-100' : ''
-                      }`}
-                      onClick={() => handleChatSelect(contact)}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 h-[calc(100vh-10rem)]">
+        <div className="md:col-span-1">
+          <Tabs defaultValue="direct" className="h-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="direct">Direct Messages</TabsTrigger>
+              <TabsTrigger value="groups">Group Chats</TabsTrigger>
+            </TabsList>
+            <TabsContent value="direct" className="p-0 h-[calc(100vh-14rem)]">
+              <ScrollArea className="h-full">
+                <div className="space-y-2 p-2">
+                  {Object.keys(messages).filter(name => !name.includes("Group")).map(contact => (
+                    <div 
+                      key={contact}
+                      className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer hover:bg-secondary transition-colors ${activeContact === contact ? 'bg-secondary' : ''}`}
+                      onClick={() => setActiveContact(contact)}
                     >
-                      <div className="relative">
-                        <Avatar>
-                          <AvatarImage src={contact.avatar} alt={contact.name} />
-                          <AvatarFallback>{contact.name.charAt(0)}</AvatarFallback>
-                        </Avatar>
-                        <span className={`absolute bottom-0 right-0 h-3 w-3 rounded-full border-2 border-white ${
-                          contact.status === 'online' ? 'bg-green-500' : 'bg-gray-400'
-                        }`} />
-                      </div>
-                      <div className="ml-3 flex-1 text-left truncate">
-                        <div className="flex items-center justify-between">
-                          <p className="text-sm font-medium">{contact.name}</p>
-                          <p className="text-xs text-gray-500">{contact.lastMessageTime}</p>
+                      <Avatar>
+                        <AvatarImage src={`https://i.pravatar.cc/150?u=${contact}`} />
+                        <AvatarFallback>{contact.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                      </Avatar>
+                      <div className="flex-1 overflow-hidden">
+                        <div className="flex justify-between items-center">
+                          <h4 className="text-sm font-medium">{contact}</h4>
+                          <span className="text-xs text-muted-foreground">{
+                            messages[contact] && messages[contact].length > 0 
+                              ? messages[contact][messages[contact].length - 1].timestamp 
+                              : ''
+                          }</span>
                         </div>
-                        <p className="text-xs text-gray-500 truncate">{contact.lastMessage}</p>
+                        <p className="text-xs text-muted-foreground truncate">
+                          {messages[contact] && messages[contact].length > 0 
+                            ? messages[contact][messages[contact].length - 1].text 
+                            : 'No messages yet'}
+                        </p>
                       </div>
-                      {contact.unreadCount && (
-                        <Badge className="ml-2">{contact.unreadCount}</Badge>
-                      )}
-                    </button>
+                    </div>
                   ))}
                 </div>
-              </TabsContent>
-              
-              <TabsContent value="groups" className="flex-1 overflow-y-auto">
-                <div className="p-2">
-                  <Button 
-                    variant="outline" 
-                    className="w-full mb-2"
-                    onClick={() => setIsNewGroupDialogOpen(true)}
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Create New Group
-                  </Button>
-                  
-                  <div className="space-y-1">
-                    {filteredGroups.map((group) => (
-                      <button
-                        key={group.id}
-                        className={`w-full flex items-center p-2 rounded-md hover:bg-gray-100 ${
-                          activeChat?.id === group.id ? 'bg-gray-100' : ''
-                        }`}
-                        onClick={() => handleChatSelect(group)}
+              </ScrollArea>
+            </TabsContent>
+            <TabsContent value="groups" className="p-0 h-[calc(100vh-14rem)]">
+              <div className="p-4 space-y-4">
+                <h3 className="font-medium">Group Chats</h3>
+                <p className="text-sm text-muted-foreground">Your study group chats will appear here</p>
+                
+                <ScrollArea className="h-[calc(100vh-22rem)]">
+                  <div className="space-y-2">
+                    {Object.keys(messages).filter(name => name.includes("Group") || name.includes("Study")).map(group => (
+                      <div 
+                        key={group}
+                        className={`flex items-center gap-3 p-3 rounded-lg cursor-pointer hover:bg-secondary transition-colors ${activeContact === group ? 'bg-secondary' : ''}`}
+                        onClick={() => setActiveContact(group)}
                       >
                         <Avatar>
-                          <AvatarImage src={group.avatar} alt={group.name} />
-                          <AvatarFallback>{group.name.charAt(0)}</AvatarFallback>
+                          <AvatarImage src={`https://i.pravatar.cc/150?u=${group}`} />
+                          <AvatarFallback>{group.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                         </Avatar>
-                        <div className="ml-3 flex-1 text-left truncate">
-                          <div className="flex items-center justify-between">
-                            <p className="text-sm font-medium">{group.name}</p>
-                            <p className="text-xs text-gray-500">{group.lastMessageTime}</p>
+                        <div className="flex-1 overflow-hidden">
+                          <div className="flex justify-between items-center">
+                            <h4 className="text-sm font-medium">{group}</h4>
+                            <span className="text-xs text-muted-foreground">{
+                              messages[group] && messages[group].length > 0 
+                                ? messages[group][messages[group].length - 1].timestamp 
+                                : ''
+                            }</span>
                           </div>
-                          <p className="text-xs text-gray-500">
-                            {group.members} members
+                          <p className="text-xs text-muted-foreground truncate">
+                            {messages[group] && messages[group].length > 0 
+                              ? messages[group][messages[group].length - 1].text 
+                              : 'No messages yet'}
                           </p>
                         </div>
-                        {group.unreadCount && (
-                          <Badge className="ml-2">{group.unreadCount}</Badge>
-                        )}
-                      </button>
+                      </div>
                     ))}
                   </div>
-                </div>
-              </TabsContent>
-            </Tabs>
-          </div>
-          
-          {/* Chat content */}
-          <div className="flex-1 flex flex-col">
-            {activeChat ? (
-              <>
-                {/* Chat header */}
-                <div className="p-4 border-b flex items-center justify-between">
-                  <div className="flex items-center">
-                    <Avatar>
-                      <AvatarImage src={(activeChat as any).avatar} alt={activeChat.name} />
-                      <AvatarFallback>{activeChat.name.charAt(0)}</AvatarFallback>
-                    </Avatar>
-                    <div className="ml-3">
-                      <p className="font-medium">{activeChat.name}</p>
-                      <p className="text-xs text-gray-500">
-                        {'members' in activeChat 
-                          ? `${activeChat.members} members` 
-                          : activeChat.status === 'online' ? 'Online' : 'Offline'
-                        }
-                      </p>
+                </ScrollArea>
+                
+                <Dialog open={showCreateGroup} onOpenChange={setShowCreateGroup}>
+                  <DialogTrigger asChild>
+                    <Button className="w-full" variant="outline">
+                      <PlusCircle className="mr-2 h-4 w-4" />
+                      Create New Group
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Create New Group</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                      <div className="space-y-2">
+                        <Label htmlFor="group-name">Group Name</Label>
+                        <Input 
+                          id="group-name" 
+                          placeholder="Enter group name" 
+                          value={groupName}
+                          onChange={e => setGroupName(e.target.value)}
+                        />
+                      </div>
+                      
+                      <div className="space-y-2">
+                        <Label>Select Members</Label>
+                        <div className="space-y-2">
+                          {["Dr. Sarah Johnson", "Michael Chen", "Emily Rodriguez"].map(contact => (
+                            <div 
+                              key={contact}
+                              className="flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:bg-secondary"
+                              onClick={() => toggleMember(contact)}
+                            >
+                              <input 
+                                type="checkbox" 
+                                id={`member-${contact}`}
+                                checked={selectedMembers.includes(contact)}
+                                onChange={() => {}}
+                                className="h-4 w-4"
+                              />
+                              <Label htmlFor={`member-${contact}`} className="flex-1 cursor-pointer">
+                                {contact}
+                              </Label>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                      
+                      <Button 
+                        className="w-full" 
+                        onClick={createNewGroup}
+                        disabled={groupName.trim() === "" || selectedMembers.length === 0}
+                      >
+                        Create Group
+                      </Button>
                     </div>
-                  </div>
-                  
-                  <div className="flex items-center space-x-2">
-                    <Button 
-                      variant="ghost" 
-                      size="icon"
-                      onClick={startAudioCall}
-                    >
-                      <Phone className="h-5 w-5" />
-                    </Button>
-                    <Button 
-                      variant="ghost" 
-                      size="icon"
-                      onClick={startVideoCall}
-                    >
-                      <Video className="h-5 w-5" />
-                    </Button>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon">
-                          <MoreVertical className="h-5 w-5" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end">
-                        <DropdownMenuItem>View profile</DropdownMenuItem>
-                        <DropdownMenuItem>Search in conversation</DropdownMenuItem>
-                        <DropdownMenuItem>Mute notifications</DropdownMenuItem>
-                        <DropdownMenuItem className="text-red-500">Block</DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                  </DialogContent>
+                </Dialog>
+              </div>
+            </TabsContent>
+          </Tabs>
+        </div>
+        
+        <div className="md:col-span-2 border rounded-lg flex flex-col h-full">
+          {activeContact ? (
+            <>
+              <div className="p-3 border-b flex justify-between items-center">
+                <div className="flex items-center gap-3">
+                  <Avatar>
+                    <AvatarImage src={`https://i.pravatar.cc/150?u=${activeContact}`} />
+                    <AvatarFallback>{activeContact.split(' ').map(n => n[0]).join('')}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <h4 className="font-medium">{activeContact}</h4>
+                    <p className="text-xs text-muted-foreground">
+                      {activeContact.includes("Group") || activeContact.includes("Study") 
+                        ? "Group chat" 
+                        : "Online"}
+                    </p>
                   </div>
                 </div>
                 
-                {/* Chat messages */}
-                <div className="flex-1 p-4 overflow-y-auto space-y-4">
-                  {chatMessages.map((message) => (
-                    <div 
-                      key={message.id}
-                      className={`flex ${message.isCurrentUser ? 'justify-end' : 'justify-start'}`}
-                    >
-                      {!message.isCurrentUser && (
-                        <Avatar className="h-8 w-8 mr-2">
-                          <AvatarImage src={(activeChat as any).avatar} alt={message.sender} />
-                          <AvatarFallback>{message.sender.charAt(0)}</AvatarFallback>
+                <div className="flex items-center gap-2">
+                  <Button variant="ghost" size="icon" onClick={startAudioCall}>
+                    <Phone className="h-5 w-5" />
+                  </Button>
+                  <Button variant="ghost" size="icon" onClick={startVideoCall}>
+                    <Video className="h-5 w-5" />
+                  </Button>
+                  <Button variant="ghost" size="icon">
+                    <MoreVertical className="h-5 w-5" />
+                  </Button>
+                </div>
+              </div>
+              
+              {(isVideoCallActive || isAudioCallActive) && (
+                <div className="relative h-64 bg-black flex items-center justify-center">
+                  {isVideoCallActive ? (
+                    <div className="text-center">
+                      <div className="flex justify-center my-4">
+                        <Avatar className="h-24 w-24">
+                          <AvatarImage src={`https://i.pravatar.cc/150?u=${activeContact}`} />
+                          <AvatarFallback>{activeContact.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                         </Avatar>
-                      )}
-                      <div>
-                        <div 
-                          className={`rounded-lg px-3 py-2 inline-block max-w-md ${
-                            message.isCurrentUser 
-                              ? 'bg-brand-blue text-white' 
-                              : 'bg-gray-100 text-gray-800'
-                          }`}
-                        >
-                          <p>{message.content}</p>
-                        </div>
-                        <p className="text-xs text-gray-500 mt-1">{message.timestamp}</p>
                       </div>
-                      {message.isCurrentUser && (
-                        <Avatar className="h-8 w-8 ml-2">
-                          <AvatarImage src="https://i.pravatar.cc/150?img=5" alt="You" />
-                          <AvatarFallback>Y</AvatarFallback>
+                      <p className="text-white">Video call with {activeContact}</p>
+                    </div>
+                  ) : (
+                    <div className="text-center">
+                      <div className="flex justify-center my-4">
+                        <Avatar className="h-24 w-24">
+                          <AvatarImage src={`https://i.pravatar.cc/150?u=${activeContact}`} />
+                          <AvatarFallback>{activeContact.split(' ').map(n => n[0]).join('')}</AvatarFallback>
                         </Avatar>
-                      )}
+                      </div>
+                      <p className="text-white">Audio call with {activeContact}</p>
+                    </div>
+                  )}
+                  <div className="absolute bottom-4 w-full flex justify-center gap-4">
+                    <Button variant="destructive" onClick={endCall}>End Call</Button>
+                    <Button variant="outline" className="bg-zinc-800 text-white">
+                      <Mic className="h-4 w-4 mr-2" />
+                      Mute
+                    </Button>
+                  </div>
+                </div>
+              )}
+              
+              <ScrollArea className="flex-1 p-4">
+                <div className="space-y-4">
+                  {messages[activeContact] && messages[activeContact].map((message, idx) => (
+                    <div 
+                      key={idx}
+                      className={`flex ${message.sender === "user" ? "justify-end" : "justify-start"}`}
+                    >
+                      <div 
+                        className={`max-w-[80%] p-3 rounded-lg ${
+                          message.sender === "user" 
+                            ? "bg-primary text-primary-foreground" 
+                            : "bg-secondary"
+                        }`}
+                      >
+                        <p>{message.text}</p>
+                        <span className="text-xs opacity-70 mt-1 block text-right">
+                          {message.timestamp}
+                        </span>
+                      </div>
                     </div>
                   ))}
                 </div>
-                
-                {/* Chat input */}
-                <div className="p-4 border-t">
-                  <form 
-                    onSubmit={(e) => {
-                      e.preventDefault();
-                      handleSendMessage();
-                    }}
-                    className="flex items-center space-x-2"
-                  >
-                    <Button variant="ghost" size="icon" type="button">
-                      <Paperclip className="h-5 w-5 text-gray-500" />
-                    </Button>
-                    <Input
-                      placeholder="Type a message..."
-                      value={messageInput}
-                      onChange={(e) => setMessageInput(e.target.value)}
-                      className="flex-1"
-                    />
-                    <Button variant="ghost" size="icon" type="button">
-                      <Mic className="h-5 w-5 text-gray-500" />
-                    </Button>
-                    <Button type="submit">
-                      <Send className="h-4 w-4 mr-2" />
-                      Send
-                    </Button>
-                  </form>
-                </div>
-              </>
-            ) : (
-              <div className="flex flex-col items-center justify-center h-full text-center p-8">
-                <MessageSquare className="h-12 w-12 text-gray-300 mb-2" />
-                <h3 className="text-xl font-medium text-gray-900">Your Messages</h3>
-                <p className="text-gray-500 mt-1 max-w-sm">
-                  Select a conversation or start a new one to chat with your instructors and classmates.
-                </p>
+              </ScrollArea>
+              
+              <div className="p-3 border-t flex gap-2">
+                <Input 
+                  placeholder="Type a message..." 
+                  value={newMessage}
+                  onChange={e => setNewMessage(e.target.value)}
+                  onKeyPress={handleKeyPress}
+                  className="flex-1"
+                />
+                <Button onClick={handleSendMessage}>
+                  <Send className="h-4 w-4" />
+                </Button>
               </div>
-            )}
-          </div>
+            </>
+          ) : (
+            <div className="flex items-center justify-center h-full">
+              <div className="text-center p-4">
+                <h3 className="font-medium text-lg mb-2">Select a conversation</h3>
+                <p className="text-muted-foreground">Choose a contact from the list to start chatting</p>
+              </div>
+            </div>
+          )}
         </div>
       </div>
       
-      <AIAssistantButton />
-      
-      {/* New Group Dialog */}
-      <Dialog open={isNewGroupDialogOpen} onOpenChange={setIsNewGroupDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Create New Group</DialogTitle>
-            <DialogDescription>
-              Start a group conversation with your classmates and instructors.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="py-4">
-            <div className="mb-4">
-              <Label htmlFor="group-name">Group Name</Label>
-              <Input
-                id="group-name"
-                value={newGroupName}
-                onChange={(e) => setNewGroupName(e.target.value)}
-                placeholder="e.g., Study Group for Biology"
-                className="mt-1"
-              />
-            </div>
-            
-            <div>
-              <Label>Add Members</Label>
-              <div className="grid grid-cols-1 gap-2 mt-1">
-                {contacts.slice(0, 3).map((contact) => (
-                  <Card key={contact.id} className="p-2">
-                    <div className="flex items-center">
-                      <input
-                        type="checkbox"
-                        id={`contact-${contact.id}`}
-                        className="mr-2"
-                      />
-                      <Avatar className="h-6 w-6 mr-2">
-                        <AvatarImage src={contact.avatar} alt={contact.name} />
-                        <AvatarFallback>{contact.name.charAt(0)}</AvatarFallback>
-                      </Avatar>
-                      <Label htmlFor={`contact-${contact.id}`} className="text-sm">
-                        {contact.name}
-                      </Label>
-                    </div>
-                  </Card>
-                ))}
-              </div>
-            </div>
-          </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsNewGroupDialogOpen(false)}>
-              Cancel
-            </Button>
-            <Button onClick={createNewGroup}>
-              Create Group
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-      
-      {/* Video Call Dialog */}
-      {isVideoCallActive && (
-        <Dialog open={isVideoCallActive} onOpenChange={setIsVideoCallActive}>
-          <DialogContent className="sm:max-w-md">
-            <DialogHeader>
-              <DialogTitle>Video Call</DialogTitle>
-              <DialogDescription>
-                Connecting to {activeChat?.name}...
-              </DialogDescription>
-            </DialogHeader>
-            <div className="h-60 bg-gray-900 rounded-md flex items-center justify-center">
-              <div className="text-white text-center">
-                <Video className="h-12 w-12 mx-auto mb-2" />
-                <p>Establishing connection...</p>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button variant="destructive" onClick={() => setIsVideoCallActive(false)}>
-                End Call
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      )}
+      <div className="mt-6 flex justify-center">
+        <Button variant="outline" className="w-full max-w-md">
+          <UserPlus className="mr-2 h-4 w-4" />
+          AI Assistant
+        </Button>
+      </div>
     </Layout>
   );
 };

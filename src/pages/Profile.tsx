@@ -1,6 +1,7 @@
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Layout from "@/components/Layout";
+import { useAuth } from "@/context/AuthContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,17 +9,35 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Camera } from "lucide-react";
-import { useToast } from "@/components/ui/use-toast";
+import { useToast } from "@/hooks/use-toast";
 
 const Profile = () => {
+  const { user, updateProfile } = useAuth();
   const { toast } = useToast();
   const [formData, setFormData] = useState({
-    firstName: "Sajid",
-    lastName: "Mehmood",
-    email: "jane.doe@example.com",
-    phone: "(555) 123-4567",
-    bio: "Computer Science student with a passion for AI and machine learning."
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    bio: ""
   });
+
+  useEffect(() => {
+    if (user) {
+      // Split name into first and last
+      const nameParts = user.name.split(' ');
+      const firstName = nameParts[0] || "";
+      const lastName = nameParts.slice(1).join(' ') || "";
+      
+      setFormData({
+        firstName,
+        lastName,
+        email: user.email || "",
+        phone: user.phone || "",
+        bio: user.bio || ""
+      });
+    }
+  }, [user]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -30,11 +49,21 @@ const Profile = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    toast({
-      title: "Profile updated",
-      description: "Your profile information has been saved successfully.",
+    
+    if (!user) return;
+    
+    const fullName = `${formData.firstName} ${formData.lastName}`.trim();
+    updateProfile({
+      name: fullName,
+      email: formData.email,
+      phone: formData.phone,
+      bio: formData.bio
     });
   };
+
+  if (!user) {
+    return <Layout title="My Profile">Loading profile...</Layout>;
+  }
 
   return (
     <Layout title="My Profile">
@@ -53,8 +82,8 @@ const Profile = () => {
                   <div className="flex flex-col items-center sm:flex-row sm:items-start space-y-4 sm:space-y-0 sm:space-x-4">
                     <div className="relative">
                       <Avatar className="w-24 h-24">
-                        <AvatarImage src="https://i.pravatar.cc/150?img=12" />
-                        <AvatarFallback>SM</AvatarFallback>
+                        <AvatarImage src={user.photoURL} />
+                        <AvatarFallback>{`${formData.firstName.charAt(0)}${formData.lastName.charAt(0)}`}</AvatarFallback>
                       </Avatar>
                       <div className="absolute bottom-0 right-0 bg-white p-1 rounded-full border shadow-sm cursor-pointer">
                         <Camera className="h-4 w-4 text-gray-500" />
@@ -151,6 +180,13 @@ const Profile = () => {
               <CardTitle>Account Settings</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
+              <div>
+                <h3 className="font-medium mb-1">Account Type</h3>
+                <p className="text-sm text-gray-500 mb-3">
+                  Your current role: <span className="font-medium">{user.role === 'teacher' ? 'Teacher' : 'Student'}</span>
+                </p>
+              </div>
+              
               <div>
                 <h3 className="font-medium mb-1">Privacy</h3>
                 <p className="text-sm text-gray-500 mb-3">

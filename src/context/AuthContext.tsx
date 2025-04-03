@@ -10,13 +10,16 @@ export interface User {
   email: string;
   photoURL: string;
   role: UserRole;
+  phone?: string;
+  bio?: string;
 }
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string, name?: string, role?: UserRole) => Promise<void>;
   loginWithGoogle: () => Promise<void>;
   logout: () => Promise<void>;
+  updateProfile: (data: Partial<User>) => Promise<void>;
   isAuthenticated: boolean;
   isLoading: boolean;
   isTeacher: boolean;
@@ -49,24 +52,28 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     setIsLoading(false);
   }, []);
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string, name?: string, role?: UserRole) => {
     try {
       setIsLoading(true);
       // This is a mock login, in a real app you would use a real authentication service
-      // For demo purposes, we'll create a mock user with student role by default
+      // For demo purposes, we'll create a mock user with the requested role
       const mockUser: User = {
-        id: '123456',
-        name: 'Student User',
+        id: `user_${Date.now()}`,
+        name: name || "Student User",
         email: email,
-        photoURL: 'https://i.pravatar.cc/150?img=3',
-        role: 'student',
+        photoURL: `https://i.pravatar.cc/150?img=${Math.floor(Math.random() * 70)}`,
+        role: role || 'student',
+        phone: "(555) 123-4567",
+        bio: role === 'teacher' 
+          ? "Experienced educator with a passion for interactive learning." 
+          : "Student with a passion for learning and collaboration."
       };
       
       setUser(mockUser);
       localStorage.setItem('educonnect_user', JSON.stringify(mockUser));
       toast({
         title: "Logged in successfully",
-        description: `Welcome back, ${mockUser.name}!`,
+        description: `Welcome, ${mockUser.name}!`,
       });
     } catch (error) {
       console.error("Login error:", error);
@@ -75,6 +82,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         description: "Please check your credentials and try again.",
         variant: "destructive",
       });
+      throw error;
     } finally {
       setIsLoading(false);
     }
@@ -86,11 +94,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       // This is a mock Google login, in a real app you would integrate with Google Auth
       // For demo purposes, we'll create a mock user
       const mockUser: User = {
-        id: '123456',
-        name: 'Google User',
-        email: 'google.user@example.com',
-        photoURL: 'https://i.pravatar.cc/150?img=4',
+        id: `google_user_${Date.now()}`,
+        name: "Google User",
+        email: "google.user@example.com",
+        photoURL: `https://i.pravatar.cc/150?img=${Math.floor(Math.random() * 70)}`,
         role: 'student',
+        phone: "(555) 987-6543",
+        bio: "Student using Google authentication for virtual learning."
       };
       
       setUser(mockUser);
@@ -106,8 +116,30 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         description: "Please try again or use another method.",
         variant: "destructive",
       });
+      throw error;
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const updateProfile = async (data: Partial<User>) => {
+    if (!user) return;
+    
+    try {
+      const updatedUser = { ...user, ...data };
+      setUser(updatedUser);
+      localStorage.setItem('educonnect_user', JSON.stringify(updatedUser));
+      toast({
+        title: "Profile updated",
+        description: "Your profile information has been saved successfully.",
+      });
+    } catch (error) {
+      console.error("Profile update error:", error);
+      toast({
+        title: "Update failed",
+        description: "There was a problem updating your profile.",
+        variant: "destructive",
+      });
     }
   };
 
@@ -125,6 +157,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     login,
     loginWithGoogle,
     logout,
+    updateProfile,
     isAuthenticated: !!user,
     isLoading,
     isTeacher: user?.role === 'teacher',
