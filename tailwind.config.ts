@@ -24,9 +24,9 @@ export default {
 			},
 			colors: {
 				'brand-blue': {
-					DEFAULT: '#2563EB',
-					dark: '#1D4ED8',
-					light: '#3B82F6',
+					DEFAULT: '#3B82F6',
+					dark: '#2563EB',
+					light: '#60A5FA',
 				},
 				'brand-purple': '#8B5CF6',
 				'brand-orange': '#F97316',

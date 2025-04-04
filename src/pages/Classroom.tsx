@@ -1,6 +1,5 @@
 
 import { useState, useRef, useEffect } from "react";
-import { useParams } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Video, Mic } from "lucide-react";
@@ -81,13 +80,13 @@ const Classroom = () => {
   return (
     <Layout>
       <div className="container mx-auto px-4 py-8">
-        <h1 className="text-2xl font-bold mb-6">Virtual Classroom</h1>
+        <h1 className="text-2xl font-bold mb-6 text-gradient">Virtual Classroom</h1>
         
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
           {/* Main Video Feed */}
           <div className="lg:col-span-2">
-            <Card className="overflow-hidden">
-              <div className="aspect-video bg-gray-900 relative">
+            <Card className="overflow-hidden card-gradient">
+              <div className="aspect-video bg-background/80 backdrop-blur-sm relative">
                 {isVideoOn ? (
                   <video
                     ref={videoRef}
@@ -99,7 +98,7 @@ const Classroom = () => {
                 ) : (
                   <div className="flex items-center justify-center h-full">
                     <div className="text-center">
-                      <div className="w-24 h-24 rounded-full bg-gray-700 mx-auto mb-4 flex items-center justify-center">
+                      <div className="w-24 h-24 rounded-full bg-secondary mx-auto mb-4 flex items-center justify-center">
                         <span className="text-3xl">{user?.name?.charAt(0) || "U"}</span>
                       </div>
                       <p className="text-gray-300">Camera is turned off</p>
@@ -130,8 +129,8 @@ const Classroom = () => {
             </Card>
             
             <div className="mt-4">
-              <h2 className="text-lg font-medium mb-2">Unlimited Video Conferencing</h2>
-              <p className="text-gray-600">
+              <h2 className="text-lg font-medium mb-2 text-gradient">Unlimited Video Conferencing</h2>
+              <p className="text-gray-400">
                 Connect with your classmates and teachers through high-quality, unlimited video calls.
                 Our platform ensures smooth communication without any time restrictions.
               </p>
@@ -140,21 +139,21 @@ const Classroom = () => {
           
           {/* Participants List */}
           <div>
-            <h2 className="text-lg font-medium mb-3">Participants (4)</h2>
-            <Card className="p-0">
-              <div className="divide-y">
-                <div className="p-3 bg-blue-50">
+            <h2 className="text-lg font-medium mb-3 text-gradient">Participants (4)</h2>
+            <Card className="p-0 card-gradient">
+              <div className="divide-y divide-white/10">
+                <div className="p-3 bg-primary/20">
                   <div className="flex items-center">
-                    <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center mr-3">
+                    <div className="w-10 h-10 rounded-full bg-primary/30 flex items-center justify-center mr-3">
                       {user?.name?.charAt(0) || "U"}
                     </div>
                     <div>
                       <p className="font-medium">{user?.name || "You"} (You)</p>
-                      <p className="text-sm text-gray-500 capitalize">{user?.role || "Student"}</p>
+                      <p className="text-sm text-gray-400 capitalize">{user?.role || "Student"}</p>
                     </div>
                     {isAudioOn && (
                       <div className="ml-auto">
-                        <Mic className="h-4 w-4 text-green-500" />
+                        <Mic className="h-4 w-4 text-primary" />
                       </div>
                     )}
                   </div>
@@ -163,16 +162,16 @@ const Classroom = () => {
                 {participants.map(participant => (
                   <div key={participant.id} className="p-3">
                     <div className="flex items-center">
-                      <div className="w-10 h-10 rounded-full bg-gray-100 flex items-center justify-center mr-3">
+                      <div className="w-10 h-10 rounded-full bg-secondary flex items-center justify-center mr-3">
                         {participant.name.charAt(0)}
                       </div>
                       <div>
                         <p className="font-medium">{participant.name}</p>
-                        <p className="text-sm text-gray-500">{participant.role}</p>
+                        <p className="text-sm text-gray-400">{participant.role}</p>
                       </div>
                       {participant.isSpeaking && (
                         <div className="ml-auto">
-                          <Mic className="h-4 w-4 text-green-500" />
+                          <Mic className="h-4 w-4 text-primary" />
                         </div>
                       )}
                     </div>
@@ -182,18 +181,18 @@ const Classroom = () => {
             </Card>
             
             <div className="mt-4">
-              <h3 className="text-md font-medium mb-2">Call Information</h3>
+              <h3 className="text-md font-medium mb-2 text-gradient">Call Information</h3>
               <div className="text-sm">
                 <p className="flex justify-between py-1">
-                  <span className="text-gray-500">Status:</span>
-                  <span className="font-medium text-green-600">Active Call</span>
+                  <span className="text-gray-400">Status:</span>
+                  <span className="font-medium text-primary">Active Call</span>
                 </p>
                 <p className="flex justify-between py-1">
-                  <span className="text-gray-500">Duration:</span>
+                  <span className="text-gray-400">Duration:</span>
                   <span>Unlimited</span>
                 </p>
                 <p className="flex justify-between py-1">
-                  <span className="text-gray-500">Quality:</span>
+                  <span className="text-gray-400">Quality:</span>
                   <span>HD (720p)</span>
                 </p>
               </div>
