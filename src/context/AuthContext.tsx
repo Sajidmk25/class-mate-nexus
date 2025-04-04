@@ -17,7 +17,8 @@ export interface User {
 interface AuthContextType {
   user: User | null;
   login: (email: string, password: string, name?: string, role?: UserRole) => Promise<void>;
-  loginWithGoogle: () => Promise<void>;
+  signup: (email: string, password: string, name: string, role: UserRole) => Promise<void>;
+  loginWithGoogle: (role?: UserRole) => Promise<void>;
   logout: () => Promise<void>;
   updateProfile: (data: Partial<User>) => Promise<void>;
   isAuthenticated: boolean;
@@ -88,27 +89,65 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   };
 
-  const loginWithGoogle = async () => {
+  const signup = async (email: string, password: string, name: string, role: UserRole) => {
     try {
       setIsLoading(true);
-      // This is a mock Google login, in a real app you would integrate with Google Auth
-      // For demo purposes, we'll create a mock user
+      // This is a mock signup, in a real app you would register a new user
       const mockUser: User = {
-        id: `google_user_${Date.now()}`,
-        name: "Google User",
-        email: "google.user@example.com",
+        id: `user_${Date.now()}`,
+        name: name,
+        email: email,
         photoURL: `https://i.pravatar.cc/150?img=${Math.floor(Math.random() * 70)}`,
-        role: 'student',
-        phone: "(555) 987-6543",
-        bio: "Student using Google authentication for virtual learning."
+        role: role,
+        phone: "",
+        bio: role === 'teacher' 
+          ? "Experienced educator with a passion for interactive learning." 
+          : "Student with a passion for learning and collaboration."
       };
       
       setUser(mockUser);
       localStorage.setItem('educonnect_user', JSON.stringify(mockUser));
       toast({
-        title: "Logged in with Google",
-        description: `Welcome, ${mockUser.name}!`,
+        title: "Account created successfully",
+        description: `Welcome to EduConnect, ${mockUser.name}!`,
       });
+    } catch (error) {
+      console.error("Signup error:", error);
+      toast({
+        title: "Signup failed",
+        description: "Please check your information and try again.",
+        variant: "destructive",
+      });
+      throw error;
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const loginWithGoogle = async (role?: UserRole) => {
+    try {
+      setIsLoading(true);
+      // In a real app, this would open Google authentication
+      // Simulate Google authentication response
+      setTimeout(() => {
+        const mockUser: User = {
+          id: `google_user_${Date.now()}`,
+          name: "Google User",
+          email: "google.user@example.com",
+          photoURL: `https://i.pravatar.cc/150?img=${Math.floor(Math.random() * 70)}`,
+          role: role || 'student',
+          phone: "(555) 987-6543",
+          bio: "Student using Google authentication for virtual learning."
+        };
+        
+        setUser(mockUser);
+        localStorage.setItem('educonnect_user', JSON.stringify(mockUser));
+        toast({
+          title: "Logged in with Google",
+          description: `Welcome, ${mockUser.name}!`,
+        });
+        setIsLoading(false);
+      }, 1000); // Simulate network delay
     } catch (error) {
       console.error("Google login error:", error);
       toast({
@@ -116,9 +155,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         description: "Please try again or use another method.",
         variant: "destructive",
       });
-      throw error;
-    } finally {
       setIsLoading(false);
+      throw error;
     }
   };
 
@@ -155,6 +193,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const value = {
     user,
     login,
+    signup,
     loginWithGoogle,
     logout,
     updateProfile,
