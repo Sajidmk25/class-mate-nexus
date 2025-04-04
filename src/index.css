@@ -98,4 +98,17 @@
   .card-gradient {
     @apply bg-gradient-to-br from-secondary/80 to-background backdrop-blur-sm border border-white/10;
   }
+  
+  /* Sidebar customizations */
+  [data-sidebar="sidebar"] {
+    @apply bg-card border-r border-white/10;
+  }
+  
+  [data-sidebar="menu-button"] {
+    @apply text-foreground hover:bg-white/10;
+  }
+  
+  [data-sidebar="menu-button"][data-active="true"] {
+    @apply bg-white/10 text-primary;
+  }
 }
