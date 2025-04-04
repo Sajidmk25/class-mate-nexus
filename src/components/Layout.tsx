@@ -1,6 +1,6 @@
+
 import { ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
-import Navigation from "./Navigation";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import {
@@ -16,6 +16,17 @@ import {
   useSidebar,
   SidebarInset
 } from "@/components/ui/sidebar";
+import { 
+  Home,
+  BookOpen,
+  Video,
+  MessageSquare,
+  ClipboardList,
+  Calendar,
+  Users,
+  BarChart,
+  User
+} from "lucide-react";
 
 interface LayoutProps {
   children: ReactNode;
@@ -58,14 +69,15 @@ const AppSidebar = () => {
   const { isMobile } = useSidebar();
   
   const navItems = [
-    { name: "Dashboard", path: "/dashboard", icon: "Home" },
-    { name: "Courses", path: "/courses", icon: "BookOpen" },
-    { name: "Classroom", path: "/classroom", icon: "Video" },
-    { name: "Messages", path: "/messages", icon: "MessageSquare" },
-    { name: "Assignments", path: "/assignments", icon: "ClipboardList" },
-    { name: "Schedule", path: "/schedule", icon: "Calendar" },
-    { name: "Study Groups", path: "/study-groups", icon: "Users" },
-    { name: "Grades", path: "/grades", icon: "BarChart" },
+    { name: "Dashboard", path: "/dashboard", icon: Home },
+    { name: "Courses", path: "/courses", icon: BookOpen },
+    { name: "Classroom", path: "/classroom", icon: Video },
+    { name: "Messages", path: "/messages", icon: MessageSquare },
+    { name: "Assignments", path: "/assignments", icon: ClipboardList },
+    { name: "Schedule", path: "/schedule", icon: Calendar },
+    { name: "Study Groups", path: "/study-groups", icon: Users },
+    { name: "Grades", path: "/grades", icon: BarChart },
+    { name: "Profile", path: "/profile", icon: User }
   ];
   
   return (
@@ -87,6 +99,7 @@ const AppSidebar = () => {
                     tooltip={item.name}
                   >
                     <Link to={item.path} className="flex items-center gap-2">
+                      <item.icon className="h-4 w-4" />
                       <span>{item.name}</span>
                     </Link>
                   </SidebarMenuButton>

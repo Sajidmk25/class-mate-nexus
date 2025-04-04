@@ -46,26 +46,26 @@ const Navigation = () => {
   };
 
   return (
-    <nav className="bg-white shadow-sm">
+    <nav className="bg-card shadow-sm border-b border-white/10">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16">
           <div className="flex">
             <div className="flex-shrink-0 flex items-center">
               <Link to="/" className="flex items-center">
-                <span className="text-brand-blue font-bold text-xl">Virtual Classroom</span>
+                <span className="text-gradient font-bold text-xl">Virtual Classroom</span>
               </Link>
             </div>
           </div>
           
           <div className="hidden sm:ml-6 sm:flex sm:items-center sm:space-x-4">
-            <div className="flex items-center mr-4 text-gray-600">
+            <div className="flex items-center mr-4 text-gray-300">
               <Phone size={16} className="mr-1" />
               <span className="text-sm">+971 582424005</span>
             </div>
             
             {isAuthenticated ? (
               <>
-                <Link to="/account" className="text-gray-600 hover:text-brand-blue">
+                <Link to="/account" className="text-gray-300 hover:text-primary">
                   <Bell className="h-5 w-5" />
                 </Link>
                 
@@ -106,9 +106,14 @@ const Navigation = () => {
                 </DropdownMenu>
               </>
             ) : (
-              <Link to="/login">
-                <Button>Login</Button>
-              </Link>
+              <div className="flex space-x-2">
+                <Link to="/login">
+                  <Button variant="outline" className="border-white/20 hover:bg-white/10">Login</Button>
+                </Link>
+                <Link to="/login?signup=true">
+                  <Button>Sign Up</Button>
+                </Link>
+              </div>
             )}
           </div>
           
@@ -160,32 +165,44 @@ const Navigation = () => {
 
       {/* Mobile menu */}
       {isOpen && (
-        <div className="sm:hidden bg-white border-t">
+        <div className="sm:hidden bg-card border-t border-white/10">
           <div className="pt-2 pb-3 space-y-1">
             <div className="flex items-center mb-4 pl-3">
               <Phone size={16} className="mr-1" />
-              <span className="text-sm text-gray-600">+971 582424005</span>
+              <span className="text-sm text-gray-300">+971 582424005</span>
             </div>
             
             {!isAuthenticated && (
-              <Link
-                to="/login"
-                className="block pl-3 pr-4 py-2 text-base font-medium border-l-4 border-transparent text-gray-600 hover:text-brand-blue hover:border-brand-blue"
-                onClick={() => setIsOpen(false)}
-              >
-                <div className="flex items-center">
-                  <User className="h-5 w-5" />
-                  <span className="ml-2">Login</span>
-                </div>
-              </Link>
+              <>
+                <Link
+                  to="/login"
+                  className="block pl-3 pr-4 py-2 text-base font-medium border-l-4 border-transparent text-gray-300 hover:text-primary hover:border-primary"
+                  onClick={() => setIsOpen(false)}
+                >
+                  <div className="flex items-center">
+                    <User className="h-5 w-5" />
+                    <span className="ml-2">Login</span>
+                  </div>
+                </Link>
+                <Link
+                  to="/login?signup=true"
+                  className="block pl-3 pr-4 py-2 text-base font-medium border-l-4 border-transparent text-gray-300 hover:text-primary hover:border-primary"
+                  onClick={() => setIsOpen(false)}
+                >
+                  <div className="flex items-center">
+                    <User className="h-5 w-5" />
+                    <span className="ml-2">Sign Up</span>
+                  </div>
+                </Link>
+              </>
             )}
           </div>
           
           {isAuthenticated && (
-            <div className="border-t pt-4 pb-2">
+            <div className="border-t pt-4 pb-2 border-white/10">
               <Link
                 to="/profile"
-                className="block pl-3 pr-4 py-2 text-base font-medium border-l-4 border-transparent text-gray-600 hover:text-brand-blue hover:border-brand-blue"
+                className="block pl-3 pr-4 py-2 text-base font-medium border-l-4 border-transparent text-gray-300 hover:text-primary hover:border-primary"
                 onClick={() => setIsOpen(false)}
               >
                 <div className="flex items-center">
@@ -195,7 +212,7 @@ const Navigation = () => {
               </Link>
               <Link
                 to="/account"
-                className="block pl-3 pr-4 py-2 text-base font-medium border-l-4 border-transparent text-gray-600 hover:text-brand-blue hover:border-brand-blue"
+                className="block pl-3 pr-4 py-2 text-base font-medium border-l-4 border-transparent text-gray-300 hover:text-primary hover:border-primary"
                 onClick={() => setIsOpen(false)}
               >
                 <div className="flex items-center">
@@ -205,7 +222,7 @@ const Navigation = () => {
               </Link>
               <Link
                 to="/settings"
-                className="block pl-3 pr-4 py-2 text-base font-medium border-l-4 border-transparent text-gray-600 hover:text-brand-blue hover:border-brand-blue"
+                className="block pl-3 pr-4 py-2 text-base font-medium border-l-4 border-transparent text-gray-300 hover:text-primary hover:border-primary"
                 onClick={() => setIsOpen(false)}
               >
                 <div className="flex items-center">
@@ -218,7 +235,7 @@ const Navigation = () => {
                   handleLogout();
                   setIsOpen(false);
                 }}
-                className="block w-full text-left pl-3 pr-4 py-2 text-base font-medium border-l-4 border-transparent text-gray-600 hover:text-brand-blue hover:border-brand-blue"
+                className="block w-full text-left pl-3 pr-4 py-2 text-base font-medium border-l-4 border-transparent text-gray-300 hover:text-primary hover:border-primary"
               >
                 <div className="flex items-center">
                   <LogOut className="h-5 w-5" />

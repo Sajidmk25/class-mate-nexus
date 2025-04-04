@@ -1,3 +1,4 @@
+
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -13,6 +14,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
+import { Phone } from "lucide-react";
 
 type DonationStep = 1 | 2 | 3;
 
@@ -89,7 +91,11 @@ const Index = () => {
           <div className="flex items-center">
             <span className="text-gradient font-bold text-xl">Virtual Classroom</span>
           </div>
-          <div className="flex space-x-4">
+          <div className="flex items-center space-x-4">
+            <div className="flex items-center mr-4 text-gray-300">
+              <Phone size={16} className="mr-1" />
+              <span className="text-sm">+971 582424005</span>
+            </div>
             <Button 
               variant="outline" 
               onClick={() => setIsDonationOpen(true)}
@@ -102,9 +108,14 @@ const Index = () => {
                 <Button>Dashboard</Button>
               </Link>
             ) : (
-              <Link to="/login">
-                <Button>Login</Button>
-              </Link>
+              <div className="flex space-x-2">
+                <Link to="/login">
+                  <Button variant="outline" className="border-white/20 hover:bg-white/10">Login</Button>
+                </Link>
+                <Link to="/login?signup=true">
+                  <Button>Sign Up</Button>
+                </Link>
+              </div>
             )}
           </div>
         </div>
@@ -115,9 +126,20 @@ const Index = () => {
           <span className="text-gradient">Modern Virtual Education</span> Platform
         </h1>
         <div className="flex flex-col sm:flex-row justify-center gap-4">
-          <Link to="/login">
-            <Button size="lg" className="w-full sm:w-auto glass-card">Login to Start</Button>
-          </Link>
+          {isAuthenticated ? (
+            <Link to="/dashboard">
+              <Button size="lg" className="w-full sm:w-auto glass-card">Go to Dashboard</Button>
+            </Link>
+          ) : (
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Link to="/login">
+                <Button size="lg" className="w-full sm:w-auto glass-card">Login</Button>
+              </Link>
+              <Link to="/login?signup=true">
+                <Button size="lg" className="w-full sm:w-auto">Sign Up</Button>
+              </Link>
+            </div>
+          )}
         </div>
       </section>
 
