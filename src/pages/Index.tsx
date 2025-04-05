@@ -14,12 +14,12 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "@/hooks/use-toast";
-import { Phone } from "lucide-react";
+import { Phone, LogOut } from "lucide-react";
 
 type DonationStep = 1 | 2 | 3;
 
 const Index = () => {
-  const { isAuthenticated, loginWithGoogle } = useAuth();
+  const { isAuthenticated, loginWithGoogle, logout } = useAuth();
   const [isDonationOpen, setIsDonationOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState<DonationStep>(1);
   const [isLoading, setIsLoading] = useState(false);
@@ -94,6 +94,10 @@ const Index = () => {
       setIsLoading(false);
     }
   };
+
+  const handleLogout = async () => {
+    await logout();
+  };
   
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-background/90">
@@ -101,7 +105,7 @@ const Index = () => {
       <header className="bg-background/50 backdrop-blur-md border-b border-white/10">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <div className="flex items-center">
-            <span className="text-gradient font-bold text-xl">Virtual Classroom</span>
+            <span className="text-gradient font-bold text-xl">Sajid Mehmood</span>
           </div>
           <div className="flex items-center space-x-4">
             <div className="flex items-center mr-4 text-gray-300">
@@ -116,9 +120,19 @@ const Index = () => {
               Donate Now
             </Button>
             {isAuthenticated ? (
-              <Link to="/dashboard">
-                <Button>Dashboard</Button>
-              </Link>
+              <div className="flex space-x-2">
+                <Link to="/dashboard">
+                  <Button variant="outline" className="border-white/20 hover:bg-white/10">Dashboard</Button>
+                </Link>
+                <Button 
+                  onClick={handleLogout}
+                  variant="outline" 
+                  className="border-white/20 hover:bg-white/10 flex items-center gap-2"
+                >
+                  <LogOut className="h-4 w-4" />
+                  Logout
+                </Button>
+              </div>
             ) : (
               <div className="flex space-x-2">
                 <Link to="/login">
@@ -143,9 +157,19 @@ const Index = () => {
         </h1>
         <div className="flex flex-col sm:flex-row justify-center gap-4">
           {isAuthenticated ? (
-            <Link to="/dashboard">
-              <Button size="lg" className="w-full sm:w-auto glass-card">Go to Dashboard</Button>
-            </Link>
+            <div className="flex flex-col sm:flex-row gap-4">
+              <Link to="/dashboard">
+                <Button size="lg" className="w-full sm:w-auto glass-card">Go to Dashboard</Button>
+              </Link>
+              <Button 
+                size="lg" 
+                onClick={handleLogout}
+                className="w-full sm:w-auto flex items-center justify-center gap-2"
+              >
+                <LogOut className="h-4 w-4" />
+                Logout
+              </Button>
+            </div>
           ) : (
             <div className="flex flex-col sm:flex-row gap-4">
               <Link to="/login">
@@ -169,7 +193,7 @@ const Index = () => {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div>
-              <h3 className="text-lg font-semibold mb-4 text-gradient">Virtual Classroom</h3>
+              <h3 className="text-lg font-semibold mb-4 text-gradient">Sajid Mehmood</h3>
               <p className="text-gray-400">
                 Making virtual education accessible and engaging for everyone.
               </p>
@@ -185,7 +209,7 @@ const Index = () => {
           </div>
           
           <div className="border-t border-white/10 mt-12 pt-8 text-center text-gray-400">
-            <p>&copy; 2025 Virtual Classroom. All rights reserved.</p>
+            <p>&copy; 2025 Sajid Mehmood. All rights reserved.</p>
           </div>
         </div>
       </footer>
