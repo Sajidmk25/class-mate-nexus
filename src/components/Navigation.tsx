@@ -26,7 +26,8 @@ const Navigation = () => {
   const [isOpen, setIsOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
-  const { user, logout, isAuthenticated, isTeacher } = useAuth();
+  const { user, logout, isAuthenticated, isTeacher, loginWithGoogle } = useAuth();
+  const [isLoading, setIsLoading] = useState(false);
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -35,6 +36,17 @@ const Navigation = () => {
   const handleLogout = async () => {
     await logout();
     navigate('/');
+  };
+
+  const handleGoogleLogin = async () => {
+    setIsLoading(true);
+    try {
+      await loginWithGoogle();
+    } catch (error) {
+      console.error("Google login failed:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const getInitials = (name: string) => {
@@ -78,7 +90,7 @@ const Navigation = () => {
                       </Avatar>
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent className="w-56" align="end" forceMount>
+                  <DropdownMenuContent className="w-56 bg-card border-white/20" align="end" forceMount>
                     <DropdownMenuLabel className="font-normal">
                       <div className="flex flex-col space-y-1">
                         <p className="text-sm font-medium leading-none">{user?.name}</p>
@@ -110,9 +122,12 @@ const Navigation = () => {
                 <Link to="/login">
                   <Button variant="outline" className="border-white/20 hover:bg-white/10">Login</Button>
                 </Link>
-                <Link to="/login?signup=true">
-                  <Button>Sign Up</Button>
-                </Link>
+                <Button 
+                  onClick={handleGoogleLogin}
+                  disabled={isLoading}
+                >
+                  {isLoading ? "Signing in..." : "Sign in with Google"}
+                </Button>
               </div>
             )}
           </div>
@@ -129,7 +144,7 @@ const Navigation = () => {
                     </Avatar>
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent className="w-56" align="end" forceMount>
+                <DropdownMenuContent className="w-56 bg-card border-white/20" align="end" forceMount>
                   <DropdownMenuLabel className="font-normal">
                     <div className="flex flex-col space-y-1">
                       <p className="text-sm font-medium leading-none">{user?.name}</p>
@@ -184,16 +199,18 @@ const Navigation = () => {
                     <span className="ml-2">Login</span>
                   </div>
                 </Link>
-                <Link
-                  to="/login?signup=true"
-                  className="block pl-3 pr-4 py-2 text-base font-medium border-l-4 border-transparent text-gray-300 hover:text-primary hover:border-primary"
-                  onClick={() => setIsOpen(false)}
+                <button
+                  onClick={() => {
+                    handleGoogleLogin();
+                    setIsOpen(false);
+                  }}
+                  className="w-full text-left pl-3 pr-4 py-2 text-base font-medium border-l-4 border-transparent text-gray-300 hover:text-primary hover:border-primary"
                 >
                   <div className="flex items-center">
                     <User className="h-5 w-5" />
-                    <span className="ml-2">Sign Up</span>
+                    <span className="ml-2">Sign in with Google</span>
                   </div>
-                </Link>
+                </button>
               </>
             )}
           </div>

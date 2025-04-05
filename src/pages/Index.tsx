@@ -19,9 +19,10 @@ import { Phone } from "lucide-react";
 type DonationStep = 1 | 2 | 3;
 
 const Index = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, loginWithGoogle } = useAuth();
   const [isDonationOpen, setIsDonationOpen] = useState(false);
   const [currentStep, setCurrentStep] = useState<DonationStep>(1);
+  const [isLoading, setIsLoading] = useState(false);
   
   // Step 1 data
   const [name, setName] = useState("");
@@ -83,6 +84,17 @@ const Index = () => {
     setAmount("");
   };
   
+  const handleGoogleLogin = async () => {
+    setIsLoading(true);
+    try {
+      await loginWithGoogle();
+    } catch (error) {
+      console.error("Google login failed:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+  
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-background/90">
       {/* Hero Section */}
@@ -112,9 +124,13 @@ const Index = () => {
                 <Link to="/login">
                   <Button variant="outline" className="border-white/20 hover:bg-white/10">Login</Button>
                 </Link>
-                <Link to="/login?signup=true">
-                  <Button>Sign Up</Button>
-                </Link>
+                <Button 
+                  onClick={handleGoogleLogin}
+                  disabled={isLoading}
+                  className="flex items-center gap-2"
+                >
+                  {isLoading ? "Signing in..." : "Sign in with Google"}
+                </Button>
               </div>
             )}
           </div>
@@ -135,9 +151,14 @@ const Index = () => {
               <Link to="/login">
                 <Button size="lg" className="w-full sm:w-auto glass-card">Login</Button>
               </Link>
-              <Link to="/login?signup=true">
-                <Button size="lg" className="w-full sm:w-auto">Sign Up</Button>
-              </Link>
+              <Button 
+                size="lg" 
+                className="w-full sm:w-auto"
+                onClick={handleGoogleLogin}
+                disabled={isLoading}
+              >
+                {isLoading ? "Signing in..." : "Sign in with Google"}
+              </Button>
             </div>
           )}
         </div>
