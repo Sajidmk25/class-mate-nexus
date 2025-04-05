@@ -1,5 +1,5 @@
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -16,7 +16,7 @@
     --popover: 222 47% 11%;
     --popover-foreground: 210 40% 98%;
 
-    --primary: 217.2 91.2% 59.8%;
+    --primary: 224 76% 54%;
     --primary-foreground: 222.2 47.4% 11.2%;
 
     --secondary: 217.2 32.6% 17.5%;
@@ -54,8 +54,14 @@
   body {
     @apply bg-background text-foreground font-inter;
     font-family: 'Inter', sans-serif;
-    background: linear-gradient(to bottom, hsl(222, 47%, 11%), hsl(222, 47%, 4%));
+    background: radial-gradient(circle at top right, hsl(262, 83%, 58%, 0.15), transparent 80%), 
+                linear-gradient(to bottom, hsl(222, 47%, 11%), hsl(222, 47%, 4%));
     min-height: 100vh;
+  }
+
+  h1, h2, h3, h4 {
+    font-family: 'Playfair Display', serif;
+    @apply font-bold;
   }
 
   .animate-in {
@@ -80,11 +86,15 @@
   .text-gradient {
     @apply bg-gradient-to-r from-blue-400 via-purple-400 to-purple-600 bg-clip-text text-transparent;
   }
+  
+  .text-gradient-header {
+    @apply bg-gradient-to-r from-blue-300 via-primary to-accent bg-clip-text text-transparent;
+  }
 }
 
 @layer components {
   .feature-card {
-    @apply p-6 rounded-lg border border-white/10 bg-white/5 backdrop-blur-sm transition-all duration-300 hover:shadow-lg hover:border-primary/50;
+    @apply p-6 rounded-lg border border-white/10 bg-white/5 backdrop-blur-sm transition-all duration-300 hover:shadow-lg hover:border-primary/50 hover:scale-105;
   }
 
   .btn-primary {
@@ -99,6 +109,10 @@
     @apply bg-gradient-to-br from-secondary/80 to-background backdrop-blur-sm border border-white/10;
   }
   
+  .card-hover {
+    @apply transition-all duration-300 hover:shadow-lg hover:shadow-accent/20 hover:border-accent/40;
+  }
+  
   /* Sidebar customizations */
   [data-sidebar="sidebar"] {
     @apply bg-card border-r border-white/10;
@@ -110,5 +124,41 @@
   
   [data-sidebar="menu-button"][data-active="true"] {
     @apply bg-white/10 text-primary;
+  }
+  
+  .course-card {
+    @apply overflow-hidden transition-all duration-300 rounded-xl border border-white/10;
+  }
+  
+  .course-card:hover {
+    @apply shadow-xl shadow-accent/20 border-accent/50;
+  }
+  
+  .course-card:hover img {
+    @apply scale-110;
+  }
+  
+  .course-image {
+    @apply h-44 overflow-hidden;
+  }
+  
+  .course-image img {
+    @apply w-full h-full object-cover transition-transform duration-500;
+  }
+  
+  .progress-bar {
+    @apply h-2 rounded-full bg-gradient-to-r from-primary to-accent;
+  }
+  
+  .badge {
+    @apply px-2 py-1 text-xs font-medium rounded-full;
+  }
+  
+  .badge-primary {
+    @apply bg-primary/20 text-primary;
+  }
+  
+  .badge-accent {
+    @apply bg-accent/20 text-accent;
   }
 }

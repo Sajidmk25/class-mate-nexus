@@ -25,7 +25,8 @@ import {
   Calendar,
   Users,
   BarChart,
-  User
+  User,
+  Sparkles
 } from "lucide-react";
 
 interface LayoutProps {
@@ -43,20 +44,26 @@ const Layout = ({ children, title }: LayoutProps) => {
         <AppSidebar />
         <SidebarInset>
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full">
-            <div className="mb-6 flex items-center justify-between">
+            <div className="mb-8 flex items-center justify-between">
               <div className="flex items-center">
                 {showBackButton && (
                   <Link to="/dashboard">
-                    <Button variant="outline" size="sm" className="mr-4 border-white/20 bg-white/5 hover:bg-white/10">
+                    <Button variant="outline" size="sm" className="mr-4 border-white/20 bg-white/5 hover:bg-white/10 rounded-lg">
                       <ArrowLeft className="h-4 w-4 mr-1" />
                       Back to Dashboard
                     </Button>
                   </Link>
                 )}
-                {title && <h1 className="text-2xl font-bold text-gradient">{title}</h1>}
+                {title && (
+                  <h1 className="text-3xl font-bold text-gradient-header font-playfair">
+                    {title}
+                  </h1>
+                )}
               </div>
             </div>
-            {children}
+            <div className="animate-fade-in">
+              {children}
+            </div>
           </div>
         </SidebarInset>
       </div>
@@ -83,8 +90,9 @@ const AppSidebar = () => {
   return (
     <Sidebar>
       <SidebarHeader className="p-4">
-        <Link to="/" className="flex items-center">
-          <span className="text-gradient font-bold text-xl">Virtual Classroom</span>
+        <Link to="/" className="flex items-center gap-2">
+          <Sparkles className="h-6 w-6 text-accent animate-pulse-light" />
+          <span className="text-gradient font-bold text-xl font-playfair">Sajid Mehmood</span>
         </Link>
       </SidebarHeader>
       <SidebarContent>
@@ -99,7 +107,7 @@ const AppSidebar = () => {
                     tooltip={item.name}
                   >
                     <Link to={item.path} className="flex items-center gap-2">
-                      <item.icon className="h-4 w-4" />
+                      <item.icon className={`h-4 w-4 ${location.pathname === item.path ? 'text-accent' : ''}`} />
                       <span>{item.name}</span>
                     </Link>
                   </SidebarMenuButton>

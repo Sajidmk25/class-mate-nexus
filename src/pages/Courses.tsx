@@ -1,6 +1,6 @@
 
 import { useState } from "react";
-import { BookOpen, Plus, PencilLine, Trash } from "lucide-react";
+import { BookOpen, Plus, PencilLine, Trash, Trophy, Award, Clock } from "lucide-react";
 import Layout from "@/components/Layout";
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -30,6 +30,8 @@ const Courses = () => {
       progress: 65,
       description: "A comprehensive course covering advanced mathematical concepts and their applications.",
       image: "https://images.unsplash.com/photo-1509228627152-72ae9ae6848d?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      badge: "Popular",
+      lessons: 24,
     },
     {
       id: 2,
@@ -38,6 +40,8 @@ const Courses = () => {
       progress: 42,
       description: "Learn the fundamental principles of physics and how they explain the world around us.",
       image: "https://images.unsplash.com/photo-1636466497217-26a8cbeaf0aa?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      badge: "New",
+      lessons: 18,
     },
     {
       id: 3,
@@ -46,6 +50,8 @@ const Courses = () => {
       progress: 78,
       description: "An introduction to the core concepts of computer science and programming.",
       image: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      badge: "Advanced",
+      lessons: 32,
     },
     {
       id: 4,
@@ -54,6 +60,8 @@ const Courses = () => {
       progress: 30,
       description: "Explore the fascinating world of living organisms and biological systems.",
       image: "https://images.unsplash.com/photo-1532094349884-543bc11b234d?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      badge: "Beginner",
+      lessons: 16,
     },
   ]);
 
@@ -92,6 +100,8 @@ const Courses = () => {
       progress: 0,
       description: newCourse.description || "No description provided",
       image: newCourse.image || "https://images.unsplash.com/photo-1434030216411-0b793f4b4173?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60",
+      badge: "New",
+      lessons: Math.floor(Math.random() * 20) + 5,
     };
 
     setCourses([...courses, newCourseItem]);
@@ -154,18 +164,24 @@ const Courses = () => {
 
   return (
     <Layout title="My Courses">
+      <div className="mb-10 max-w-2xl">
+        <p className="text-gray-300">
+          Explore your personalized learning journey. Track progress, access materials, and join interactive sessions in your enrolled courses.
+        </p>
+      </div>
+      
       {isTeacher && (
-        <div className="mb-6 flex justify-end">
+        <div className="mb-8 flex justify-end">
           <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
             <DialogTrigger asChild>
-              <Button>
+              <Button className="bg-gradient-to-r from-primary to-accent hover:opacity-90 rounded-lg">
                 <Plus className="h-4 w-4 mr-2" />
                 Add New Course
               </Button>
             </DialogTrigger>
-            <DialogContent>
+            <DialogContent className="bg-card border-white/20">
               <DialogHeader>
-                <DialogTitle>Add New Course</DialogTitle>
+                <DialogTitle className="text-xl font-playfair">Add New Course</DialogTitle>
                 <DialogDescription>
                   Create a new course for your students.
                 </DialogDescription>
@@ -178,6 +194,7 @@ const Courses = () => {
                     value={newCourse.title}
                     onChange={(e) => setNewCourse({...newCourse, title: e.target.value})}
                     placeholder="e.g., Introduction to Machine Learning"
+                    className="border-white/20 bg-white/5"
                   />
                 </div>
                 <div className="grid gap-2">
@@ -187,6 +204,7 @@ const Courses = () => {
                     value={newCourse.description}
                     onChange={(e) => setNewCourse({...newCourse, description: e.target.value})}
                     placeholder="Brief description of the course content"
+                    className="border-white/20 bg-white/5"
                   />
                 </div>
                 <div className="grid gap-2">
@@ -196,59 +214,82 @@ const Courses = () => {
                     value={newCourse.image}
                     onChange={(e) => setNewCourse({...newCourse, image: e.target.value})}
                     placeholder="https://example.com/course-image.jpg"
+                    className="border-white/20 bg-white/5"
                   />
                 </div>
               </div>
               <DialogFooter>
-                <Button variant="outline" onClick={() => setIsAddDialogOpen(false)}>Cancel</Button>
-                <Button onClick={handleAddCourse}>Add Course</Button>
+                <Button variant="outline" onClick={() => setIsAddDialogOpen(false)} className="border-white/20">Cancel</Button>
+                <Button onClick={handleAddCourse} className="bg-gradient-to-r from-primary to-accent">Add Course</Button>
               </DialogFooter>
             </DialogContent>
           </Dialog>
         </div>
       )}
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
         {courses.map((course) => (
-          <Card key={course.id} className="overflow-hidden hover:shadow-md transition-shadow">
-            <div className="h-40 overflow-hidden">
+          <Card key={course.id} className="course-card">
+            <div className="course-image">
               <img 
                 src={course.image} 
                 alt={course.title}
-                className="w-full h-full object-cover hover:scale-105 transition-transform duration-300"
+                className="w-full h-full object-cover"
               />
+              {course.badge && (
+                <span className="absolute top-3 right-3 badge badge-accent">
+                  {course.badge}
+                </span>
+              )}
             </div>
             <CardHeader className="pb-2">
-              <CardTitle>{course.title}</CardTitle>
-              <p className="text-sm text-gray-500">{course.instructor}</p>
+              <div className="flex justify-between items-start mb-2">
+                <CardTitle className="text-xl font-playfair">{course.title}</CardTitle>
+              </div>
+              <p className="text-sm text-accent">{course.instructor}</p>
             </CardHeader>
             <CardContent>
-              <p className="text-sm text-gray-600 mb-4 line-clamp-2">{course.description}</p>
+              <p className="text-sm text-gray-400 mb-5 line-clamp-2">{course.description}</p>
+              
+              <div className="flex justify-between text-xs text-gray-400 mb-4">
+                <div className="flex items-center">
+                  <Award className="h-3.5 w-3.5 mr-1 text-primary" />
+                  <span>{course.lessons} Lessons</span>
+                </div>
+                <div className="flex items-center">
+                  <Clock className="h-3.5 w-3.5 mr-1 text-primary" />
+                  <span>Self-paced</span>
+                </div>
+              </div>
+              
               <div className="mb-4">
                 <div className="flex justify-between mb-1 text-sm">
                   <span>Progress</span>
-                  <span>{course.progress}%</span>
+                  <span className="text-primary font-medium">{course.progress}%</span>
                 </div>
-                <div className="w-full bg-gray-200 rounded-full h-2">
+                <div className="w-full bg-gray-700/30 rounded-full h-2">
                   <div 
-                    className="bg-brand-blue h-2 rounded-full" 
+                    className="progress-bar" 
                     style={{ width: `${course.progress}%` }}
                   />
                 </div>
               </div>
             </CardContent>
-            <CardFooter className="flex justify-between">
-              <div className="flex space-x-2">
-                <Button variant="outline" className="flex-1">
-                  View Materials
+            <CardFooter className="flex flex-col gap-3">
+              <div className="flex gap-3 w-full">
+                <Button variant="outline" className="flex-1 border-white/20 hover:bg-white/10">
+                  <BookOpen className="h-4 w-4 mr-2" />
+                  Materials
                 </Button>
                 <Link to="/classroom" className="flex-1">
-                  <Button className="w-full">Enter Class</Button>
+                  <Button className="w-full bg-gradient-to-r from-primary to-accent hover:opacity-90">
+                    Enter Class
+                  </Button>
                 </Link>
               </div>
               
               {isTeacher && (
-                <div className="flex ml-2">
+                <div className="flex justify-end gap-2 w-full">
                   <Dialog open={isEditDialogOpen && editingCourse?.id === course.id} onOpenChange={(open) => {
                     setIsEditDialogOpen(open);
                     if (!open) setEditingCourse(null);
@@ -263,13 +304,14 @@ const Courses = () => {
                           description: course.description,
                           image: course.image,
                         })}
+                        className="hover:bg-white/10 h-8 w-8"
                       >
                         <PencilLine className="h-4 w-4" />
                       </Button>
                     </DialogTrigger>
-                    <DialogContent>
+                    <DialogContent className="bg-card border-white/20">
                       <DialogHeader>
-                        <DialogTitle>Edit Course</DialogTitle>
+                        <DialogTitle className="text-xl font-playfair">Edit Course</DialogTitle>
                         <DialogDescription>
                           Make changes to the course details.
                         </DialogDescription>
@@ -282,6 +324,7 @@ const Courses = () => {
                               id="edit-title"
                               value={editingCourse.title}
                               onChange={(e) => setEditingCourse({...editingCourse, title: e.target.value})}
+                              className="border-white/20 bg-white/5"
                             />
                           </div>
                           <div className="grid gap-2">
@@ -290,6 +333,7 @@ const Courses = () => {
                               id="edit-description"
                               value={editingCourse.description}
                               onChange={(e) => setEditingCourse({...editingCourse, description: e.target.value})}
+                              className="border-white/20 bg-white/5"
                             />
                           </div>
                           <div className="grid gap-2">
@@ -298,6 +342,7 @@ const Courses = () => {
                               id="edit-image"
                               value={editingCourse.image}
                               onChange={(e) => setEditingCourse({...editingCourse, image: e.target.value})}
+                              className="border-white/20 bg-white/5"
                             />
                           </div>
                         </div>
@@ -306,10 +351,12 @@ const Courses = () => {
                         <Button variant="outline" onClick={() => {
                           setIsEditDialogOpen(false);
                           setEditingCourse(null);
-                        }}>
+                        }} className="border-white/20">
                           Cancel
                         </Button>
-                        <Button onClick={handleEditCourse}>Save Changes</Button>
+                        <Button onClick={handleEditCourse} className="bg-gradient-to-r from-primary to-accent">
+                          Save Changes
+                        </Button>
                       </DialogFooter>
                     </DialogContent>
                   </Dialog>
@@ -322,15 +369,15 @@ const Courses = () => {
                       <Button 
                         variant="ghost" 
                         size="icon"
-                        className="text-red-500 hover:text-red-700"
+                        className="text-red-500 hover:bg-red-500/10 hover:text-red-400 h-8 w-8"
                         onClick={() => setCourseToDelete(course.id)}
                       >
                         <Trash className="h-4 w-4" />
                       </Button>
                     </DialogTrigger>
-                    <DialogContent>
+                    <DialogContent className="bg-card border-white/20">
                       <DialogHeader>
-                        <DialogTitle>Delete Course</DialogTitle>
+                        <DialogTitle className="text-xl font-playfair">Delete Course</DialogTitle>
                         <DialogDescription>
                           Are you sure you want to delete this course? This action cannot be undone.
                         </DialogDescription>
@@ -339,7 +386,7 @@ const Courses = () => {
                         <Button variant="outline" onClick={() => {
                           setIsDeleteDialogOpen(false);
                           setCourseToDelete(null);
-                        }}>
+                        }} className="border-white/20">
                           Cancel
                         </Button>
                         <Button variant="destructive" onClick={handleDeleteCourse}>
