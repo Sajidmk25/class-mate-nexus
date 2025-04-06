@@ -1,6 +1,8 @@
 
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { toast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { Session, User as SupabaseUser } from '@supabase/supabase-js';
 
 export type UserRole = 'student' | 'teacher';
 
@@ -16,7 +18,9 @@ export interface User {
 
 interface AuthContextType {
   user: User | null;
-  login: (email: string, password: string, name?: string, role?: UserRole) => Promise<void>;
+  supabaseUser: SupabaseUser | null;
+  session: Session | null;
+  login: (email: string, password: string) => Promise<void>;
   signup: (email: string, password: string, name: string, role: UserRole) => Promise<void>;
   loginWithGoogle: (role?: UserRole) => Promise<void>;
   logout: () => Promise<void>;
@@ -42,45 +46,97 @@ interface AuthProviderProps {
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
   const [user, setUser] = useState<User | null>(null);
+  const [supabaseUser, setSupabaseUser] = useState<SupabaseUser | null>(null);
+  const [session, setSession] = useState<Session | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
+  // Initialize auth state from Supabase
   useEffect(() => {
-    // Check if user exists in localStorage
-    const storedUser = localStorage.getItem('educonnect_user');
-    if (storedUser) {
-      setUser(JSON.parse(storedUser));
-    }
-    setIsLoading(false);
+    // Set up Supabase auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      (event, currentSession) => {
+        setSession(currentSession);
+        setSupabaseUser(currentSession?.user ?? null);
+        
+        // Convert Supabase user to our User format if session exists
+        if (currentSession?.user) {
+          const supaUser = currentSession.user;
+          const userRole = supaUser.user_metadata.role as UserRole || 'student';
+          
+          const userObj: User = {
+            id: supaUser.id,
+            name: supaUser.user_metadata.name || supaUser.email?.split('@')[0] || 'User',
+            email: supaUser.email || '',
+            photoURL: supaUser.user_metadata.avatar_url || `https://i.pravatar.cc/150?img=${Math.floor(Math.random() * 70)}`,
+            role: userRole,
+            phone: supaUser.phone || '',
+            bio: supaUser.user_metadata.bio || ''
+          };
+          
+          setUser(userObj);
+        } else {
+          setUser(null);
+        }
+      }
+    );
+
+    // Check for existing session
+    const initializeSession = async () => {
+      const { data: { session: initialSession } } = await supabase.auth.getSession();
+      
+      if (initialSession?.user) {
+        setSession(initialSession);
+        setSupabaseUser(initialSession.user);
+        
+        const userRole = initialSession.user.user_metadata.role as UserRole || 'student';
+        
+        const userObj: User = {
+          id: initialSession.user.id,
+          name: initialSession.user.user_metadata.name || initialSession.user.email?.split('@')[0] || 'User',
+          email: initialSession.user.email || '',
+          photoURL: initialSession.user.user_metadata.avatar_url || `https://i.pravatar.cc/150?img=${Math.floor(Math.random() * 70)}`,
+          role: userRole,
+          phone: initialSession.user.phone || '',
+          bio: initialSession.user.user_metadata.bio || ''
+        };
+        
+        setUser(userObj);
+      }
+      
+      setIsLoading(false);
+    };
+    
+    initializeSession();
+
+    // Cleanup
+    return () => {
+      subscription?.unsubscribe();
+    };
   }, []);
 
-  const login = async (email: string, password: string, name?: string, role?: UserRole) => {
+  const login = async (email: string, password: string) => {
     try {
       setIsLoading(true);
-      // This is a mock login, in a real app you would use a real authentication service
-      // For demo purposes, we'll create a mock user with the requested role
-      const mockUser: User = {
-        id: `user_${Date.now()}`,
-        name: name || "Student User",
-        email: email,
-        photoURL: `https://i.pravatar.cc/150?img=${Math.floor(Math.random() * 70)}`,
-        role: role || 'student',
-        phone: "(555) 123-4567",
-        bio: role === 'teacher' 
-          ? "Experienced educator with a passion for interactive learning." 
-          : "Student with a passion for learning and collaboration."
-      };
       
-      setUser(mockUser);
-      localStorage.setItem('educonnect_user', JSON.stringify(mockUser));
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+      
+      if (error) {
+        throw error;
+      }
+      
       toast({
         title: "Logged in successfully",
-        description: `Welcome, ${mockUser.name}!`,
+        description: `Welcome back!`,
       });
-    } catch (error) {
+      
+    } catch (error: any) {
       console.error("Login error:", error);
       toast({
         title: "Login failed",
-        description: "Please check your credentials and try again.",
+        description: error.message || "Please check your credentials and try again.",
         variant: "destructive",
       });
       throw error;
@@ -92,30 +148,36 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const signup = async (email: string, password: string, name: string, role: UserRole) => {
     try {
       setIsLoading(true);
-      // This is a mock signup, in a real app you would register a new user
-      const mockUser: User = {
-        id: `user_${Date.now()}`,
-        name: name,
-        email: email,
-        photoURL: `https://i.pravatar.cc/150?img=${Math.floor(Math.random() * 70)}`,
-        role: role,
-        phone: "",
-        bio: role === 'teacher' 
-          ? "Experienced educator with a passion for interactive learning." 
-          : "Student with a passion for learning and collaboration."
-      };
       
-      setUser(mockUser);
-      localStorage.setItem('educonnect_user', JSON.stringify(mockUser));
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            name,
+            role,
+            avatar_url: `https://i.pravatar.cc/150?img=${Math.floor(Math.random() * 70)}`,
+            bio: role === 'teacher' 
+              ? "Experienced educator with a passion for interactive learning." 
+              : "Student with a passion for learning and collaboration."
+          }
+        }
+      });
+      
+      if (error) {
+        throw error;
+      }
+      
       toast({
         title: "Account created successfully",
-        description: `Welcome to EduConnect, ${mockUser.name}!`,
+        description: `Welcome to EduConnect, ${name}!`,
       });
-    } catch (error) {
+      
+    } catch (error: any) {
       console.error("Signup error:", error);
       toast({
         title: "Signup failed",
-        description: "Please check your information and try again.",
+        description: error.message || "Please check your information and try again.",
         variant: "destructive",
       });
       throw error;
@@ -127,77 +189,112 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
   const loginWithGoogle = async (role?: UserRole) => {
     try {
       setIsLoading(true);
-      // In a real app, this would open Google authentication
-      // Simulate Google authentication response
-      setTimeout(() => {
-        const mockUser: User = {
-          id: `google_user_${Date.now()}`,
-          name: "Google User",
-          email: "google.user@example.com",
-          photoURL: `https://i.pravatar.cc/150?img=${Math.floor(Math.random() * 70)}`,
-          role: role || 'student',
-          phone: "(555) 987-6543",
-          bio: "Student using Google authentication for virtual learning."
-        };
-        
-        setUser(mockUser);
-        localStorage.setItem('educonnect_user', JSON.stringify(mockUser));
-        toast({
-          title: "Logged in with Google",
-          description: `Welcome, ${mockUser.name}!`,
-        });
-        setIsLoading(false);
-      }, 1000); // Simulate network delay
-    } catch (error) {
+      
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
+          redirectTo: `${window.location.origin}/dashboard`
+        }
+      });
+      
+      if (error) {
+        throw error;
+      }
+      
+    } catch (error: any) {
       console.error("Google login error:", error);
       toast({
         title: "Google login failed",
-        description: "Please try again or use another method.",
+        description: error.message || "Please try again or use another method.",
         variant: "destructive",
       });
-      setIsLoading(false);
       throw error;
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const updateProfile = async (data: Partial<User>) => {
-    if (!user) return;
+    if (!user || !supabaseUser) return;
     
     try {
+      setIsLoading(true);
+      
+      const { error } = await supabase.auth.updateUser({
+        data: {
+          name: data.name || user.name,
+          role: data.role || user.role,
+          bio: data.bio || user.bio,
+          phone: data.phone || user.phone,
+        }
+      });
+      
+      if (error) {
+        throw error;
+      }
+      
+      // Update local user state
       const updatedUser = { ...user, ...data };
       setUser(updatedUser);
-      localStorage.setItem('educonnect_user', JSON.stringify(updatedUser));
+      
       toast({
         title: "Profile updated",
         description: "Your profile information has been saved successfully.",
       });
-    } catch (error) {
+      
+    } catch (error: any) {
       console.error("Profile update error:", error);
       toast({
         title: "Update failed",
-        description: "There was a problem updating your profile.",
+        description: error.message || "There was a problem updating your profile.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const logout = async () => {
+    try {
+      const { error } = await supabase.auth.signOut();
+      
+      if (error) {
+        throw error;
+      }
+      
+      setUser(null);
+      setSupabaseUser(null);
+      setSession(null);
+      
+      toast({
+        title: "Logged out",
+        description: "You have been successfully logged out.",
+      });
+      
+    } catch (error: any) {
+      console.error("Logout error:", error);
+      toast({
+        title: "Logout failed",
+        description: error.message || "There was a problem logging you out.",
         variant: "destructive",
       });
     }
   };
 
-  const logout = async () => {
-    setUser(null);
-    localStorage.removeItem('educonnect_user');
-    toast({
-      title: "Logged out",
-      description: "You have been successfully logged out.",
-    });
-  };
-
   const value = {
     user,
+    supabaseUser,
+    session,
     login,
     signup,
     loginWithGoogle,
     logout,
     updateProfile,
-    isAuthenticated: !!user,
+    isAuthenticated: !!session,
     isLoading,
     isTeacher: user?.role === 'teacher',
   };

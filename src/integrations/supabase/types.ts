@@ -9,6 +9,97 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      classroom_attendance: {
+        Row: {
+          created_at: string
+          duration_minutes: number | null
+          id: string
+          join_time: string | null
+          leave_time: string | null
+          session_id: string | null
+          student_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          duration_minutes?: number | null
+          id?: string
+          join_time?: string | null
+          leave_time?: string | null
+          session_id?: string | null
+          student_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          duration_minutes?: number | null
+          id?: string
+          join_time?: string | null
+          leave_time?: string | null
+          session_id?: string | null
+          student_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "classroom_attendance_student_id_fkey"
+            columns: ["student_id"]
+            isOneToOne: false
+            referencedRelation: "profile"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      classroom_sessions: {
+        Row: {
+          course_id: string | null
+          created_at: string
+          description: string | null
+          end_time: string | null
+          id: string
+          meeting_link: string | null
+          password: string | null
+          recording_url: string | null
+          session_type: string | null
+          start_time: string | null
+          title: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          course_id?: string | null
+          created_at?: string
+          description?: string | null
+          end_time?: string | null
+          id?: string
+          meeting_link?: string | null
+          password?: string | null
+          recording_url?: string | null
+          session_type?: string | null
+          start_time?: string | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          course_id?: string | null
+          created_at?: string
+          description?: string | null
+          end_time?: string | null
+          id?: string
+          meeting_link?: string | null
+          password?: string | null
+          recording_url?: string | null
+          session_type?: string | null
+          start_time?: string | null
+          title?: string | null
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "classroom_sessions_course_id_fkey"
+            columns: ["course_id"]
+            isOneToOne: false
+            referencedRelation: "courses"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       courses: {
         Row: {
           code: string | null
@@ -19,7 +110,10 @@ export type Database = {
           image_url: string | null
           "instructor_id uuid": string
           is_active: boolean | null
+          max_students: number
           start_date: string | null
+          syllabus: string | null
+          teacher_id: string | null
           title: string
           updated_at: string | null
         }
@@ -32,7 +126,10 @@ export type Database = {
           image_url?: string | null
           "instructor_id uuid"?: string
           is_active?: boolean | null
+          max_students?: number
           start_date?: string | null
+          syllabus?: string | null
+          teacher_id?: string | null
           title?: string
           updated_at?: string | null
         }
@@ -45,11 +142,22 @@ export type Database = {
           image_url?: string | null
           "instructor_id uuid"?: string
           is_active?: boolean | null
+          max_students?: number
           start_date?: string | null
+          syllabus?: string | null
+          teacher_id?: string | null
           title?: string
           updated_at?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "courses_teacher_id_fkey"
+            columns: ["teacher_id"]
+            isOneToOne: false
+            referencedRelation: "profile"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       enrollments: {
         Row: {
@@ -82,6 +190,78 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      messages: {
+        Row: {
+          course_id: string | null
+          created_at: string
+          id: number
+          is_read: boolean | null
+          message_text: string | null
+          receiver_id: string | null
+          sender_id: string | null
+          updated_at: string | null
+        }
+        Insert: {
+          course_id?: string | null
+          created_at?: string
+          id?: number
+          is_read?: boolean | null
+          message_text?: string | null
+          receiver_id?: string | null
+          sender_id?: string | null
+          updated_at?: string | null
+        }
+        Update: {
+          course_id?: string | null
+          created_at?: string
+          id?: number
+          is_read?: boolean | null
+          message_text?: string | null
+          receiver_id?: string | null
+          sender_id?: string | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
+      profile: {
+        Row: {
+          avatar_url: string | null
+          bio: string | null
+          created_at: string
+          enrollment_date: string | null
+          full_name: string | null
+          id: string
+          "preferences JSONB": Json | null
+          role: string | null
+          student_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          enrollment_date?: string | null
+          full_name?: string | null
+          id?: string
+          "preferences JSONB"?: Json | null
+          role?: string | null
+          student_id?: string
+          updated_at?: string | null
+        }
+        Update: {
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string
+          enrollment_date?: string | null
+          full_name?: string | null
+          id?: string
+          "preferences JSONB"?: Json | null
+          role?: string | null
+          student_id?: string
+          updated_at?: string | null
+        }
+        Relationships: []
       }
       users: {
         Row: {
