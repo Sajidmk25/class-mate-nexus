@@ -196,31 +196,46 @@ export const authService = {
   },
   
   async loginWithGoogle(role?: UserRole) {
-    // Get the current domain, adjusting for localhost
-    const domain = window.location.hostname === 'localhost' 
-      ? `${window.location.protocol}//${window.location.host}`
-      : window.location.origin;
-    
-    // Create redirect URL that will handle the return from Google auth
-    const redirectTo = `${domain}/dashboard`;
-    console.log("Redirect URL:", redirectTo);
-    
-    const { data, error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        queryParams: {
-          access_type: 'offline',
-          prompt: 'consent',
-        },
-        redirectTo
+    try {
+      // More reliable redirect URL generation
+      const origin = window.location.origin;
+      const redirectTo = `${origin}/dashboard`;
+      
+      console.log("Google login - Redirect URL:", redirectTo);
+      
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          redirectTo,
+          queryParams: {
+            access_type: 'offline',
+            prompt: 'consent',
+          },
+          // Explicitly set scopes
+          scopes: 'email profile',
+        }
+      });
+      
+      if (error) {
+        console.error("Google sign in error:", error);
+        toast({
+          title: "Google sign in failed",
+          description: error.message || "There was a problem signing in with Google. Please try again.",
+          variant: "destructive",
+        });
+        throw error;
       }
-    });
-    
-    if (error) {
+      
+      return data;
+    } catch (error: any) {
+      console.error("Google login error:", error);
+      toast({
+        title: "Google login failed",
+        description: "There was an error connecting to Google. Please try again or use email login.",
+        variant: "destructive",
+      });
       throw error;
     }
-    
-    return data;
   },
   
   async logout() {

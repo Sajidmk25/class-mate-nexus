@@ -16,14 +16,19 @@ export function useAuthState() {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, currentSession) => {
         console.log("Auth state changed:", event, currentSession?.user?.id);
-        setSession(currentSession);
-        setSupabaseUser(currentSession?.user ?? null);
         
-        // Convert Supabase user to our User format if session exists
-        if (currentSession?.user) {
-          const userObj = mapSupabaseUserToUser(currentSession.user);
-          setUser(userObj);
+        if (currentSession) {
+          setSession(currentSession);
+          setSupabaseUser(currentSession.user);
+          
+          // Convert Supabase user to our User format
+          if (currentSession.user) {
+            const userObj = mapSupabaseUserToUser(currentSession.user);
+            setUser(userObj);
+          }
         } else {
+          setSession(null);
+          setSupabaseUser(null);
           setUser(null);
         }
       }
