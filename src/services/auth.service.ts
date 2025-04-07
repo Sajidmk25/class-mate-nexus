@@ -1,4 +1,3 @@
-
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { User, UserRole } from '@/types/auth.types';
@@ -28,13 +27,6 @@ export const authService = {
       
       if (error) {
         console.error("Login error:", error);
-        
-        // Handle specific error cases
-        if (error.message?.includes('Email not confirmed')) {
-          // Try to auto-confirm the email by signing up again
-          return this.signup(email, password, email.split('@')[0], 'student');
-        }
-        
         throw error;
       }
       
@@ -52,7 +44,7 @@ export const authService = {
   
   async signup(email: string, password: string, name: string, role: UserRole) {
     try {
-      // First try sign up
+      // Sign up directly with auto confirm
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -72,9 +64,9 @@ export const authService = {
         throw error;
       }
       
-      // Since we have email confirmation disabled, let's auto-login
+      // Auto-login after signup
       if (!data.session) {
-        console.log("No session after signup, attempting to login");
+        console.log("No session after signup, attempting auto-login");
         const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
           email,
           password
@@ -82,33 +74,21 @@ export const authService = {
         
         if (loginError) {
           console.error("Auto-login after signup failed:", loginError);
-          if (loginError.message?.includes('Email not confirmed')) {
-            toast({
-              title: "Email confirmation required",
-              description: "Please check your inbox and confirm your email before logging in.",
-              variant: "destructive",
-            });
-          } else {
-            // Continue anyway, don't throw
-            toast({
-              title: "Account created",
-              description: "Your account was created but we couldn't log you in automatically. Please try logging in manually.",
-              variant: "destructive",
-            });
-          }
-        } else {
-          toast({
-            title: "Account created successfully",
-            description: `Welcome to Virtual Classroom, ${name}!`,
-          });
-          return loginData;
+          throw loginError;
         }
-      } else {
+        
+        console.log("Auto-login successful:", loginData.user?.id);
         toast({
           title: "Account created successfully",
           description: `Welcome to Virtual Classroom, ${name}!`,
         });
+        return loginData;
       }
+      
+      toast({
+        title: "Account created successfully",
+        description: `Welcome to Virtual Classroom, ${name}!`,
+      });
       
       return data;
     } catch (error: any) {
@@ -117,6 +97,7 @@ export const authService = {
       // If the user already exists, try to log them in instead
       if (error.message?.includes('already')) {
         try {
+          console.log("User already exists, attempting to log in");
           const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
             email,
             password
@@ -124,13 +105,6 @@ export const authService = {
           
           if (loginError) {
             console.error("Login after failed signup error:", loginError);
-            if (loginError.message?.includes('Invalid login credentials')) {
-              toast({
-                title: "Email already in use",
-                description: "An account with this email already exists but the password is incorrect. Please try logging in with the correct password.",
-                variant: "destructive",
-              });
-            }
             throw loginError;
           }
           

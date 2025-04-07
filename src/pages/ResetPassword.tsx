@@ -18,21 +18,27 @@ const ResetPassword = () => {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
   const [accessToken, setAccessToken] = useState<string | null>(null);
+  const [debugInfo, setDebugInfo] = useState<string>("");
 
   // Check for hash fragment when component mounts
   useEffect(() => {
+    console.log("ResetPassword component mounted");
+    console.log("Current URL:", window.location.href);
+    
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
     const token = hashParams.get("access_token");
     setAccessToken(token);
     
     if (!token) {
+      console.error("No access token found in URL hash");
+      setDebugInfo(`URL: ${window.location.href}, Hash: ${window.location.hash}`);
       toast({
         title: "Invalid reset link",
         description: "This password reset link appears to be invalid or has expired.",
         variant: "destructive",
       });
     } else {
-      console.log("Access token found in URL:", token);
+      console.log("Access token found in URL:", token.substring(0, 10) + "...");
     }
   }, []);
 
@@ -57,6 +63,8 @@ const ResetPassword = () => {
 
     setIsLoading(true);
     try {
+      console.log("Setting session with access token");
+      
       // Set the session from the access token
       const { error: sessionError } = await supabase.auth.setSession({
         access_token: accessToken,
@@ -64,16 +72,21 @@ const ResetPassword = () => {
       });
       
       if (sessionError) {
+        console.error("Session error:", sessionError);
         throw sessionError;
       }
+      
+      console.log("Session set successfully, updating password");
       
       // Now update the user password
       const { error } = await supabase.auth.updateUser({ password });
       
       if (error) {
+        console.error("Password update error:", error);
         throw error;
       }
       
+      console.log("Password updated successfully");
       setIsSuccess(true);
       toast({
         title: "Password updated successfully",
@@ -88,6 +101,7 @@ const ResetPassword = () => {
     } catch (error: any) {
       console.error("Password reset error:", error);
       setErrorMessage(error.message || "Failed to reset password. Please try again.");
+      setDebugInfo(JSON.stringify(error));
     } finally {
       setIsLoading(false);
     }
@@ -105,6 +119,14 @@ const ResetPassword = () => {
           <Alert variant="destructive" className="mb-4 animate-in fade-in">
             <AlertCircle className="h-4 w-4" />
             <AlertDescription>{errorMessage}</AlertDescription>
+          </Alert>
+        )}
+        
+        {debugInfo && (
+          <Alert className="mb-4 animate-in fade-in bg-amber-500/10 border-amber-500/20">
+            <AlertDescription className="text-xs break-words font-mono">
+              Debug: {debugInfo}
+            </AlertDescription>
           </Alert>
         )}
         
