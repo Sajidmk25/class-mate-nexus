@@ -10,7 +10,6 @@ import SecuritySettings from "@/components/account/SecuritySettings";
 
 const Account = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("notifications");
   
   const handleNavigateToProfile = () => {
     navigate("/profile");
