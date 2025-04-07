@@ -1,18 +1,21 @@
 
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { useAuth } from "@/context/AuthContext";
 import { UserRole } from "@/types/auth.types";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
-import { AlertCircle, Loader2 } from "lucide-react";
+import { AlertCircle } from "lucide-react";
 import { authService } from "@/services/auth.service";
+
+// Import the new component files
+import { LoginForm } from "@/components/auth/LoginForm";
+import { SignupForm } from "@/components/auth/SignupForm";
+import { PasswordResetForm } from "@/components/auth/PasswordResetForm";
+import { GoogleButton } from "@/components/auth/GoogleButton";
+import { AuthDivider } from "@/components/auth/AuthDivider";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -170,115 +173,33 @@ const Login = () => {
               </CardHeader>
               <CardContent>
                 {showResetForm ? (
-                  <form onSubmit={handleResetPassword} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="reset-email">Email</Label>
-                      <Input 
-                        id="reset-email"
-                        type="email"
-                        placeholder="you@example.com"
-                        value={resetEmail}
-                        onChange={(e) => setResetEmail(e.target.value)}
-                        required
-                        disabled={isLoading}
-                        className="bg-white border-white/20"
-                      />
-                    </div>
-                    <div className="flex gap-2">
-                      <Button 
-                        type="button" 
-                        variant="outline" 
-                        className="flex-1"
-                        onClick={() => setShowResetForm(false)}
-                        disabled={isLoading}
-                      >
-                        Cancel
-                      </Button>
-                      <Button type="submit" className="flex-1" disabled={isLoading}>
-                        {isLoading ? (
-                          <>
-                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                            Sending...
-                          </>
-                        ) : "Send reset email"}
-                      </Button>
-                    </div>
-                  </form>
+                  <PasswordResetForm
+                    email={resetEmail}
+                    setEmail={setResetEmail}
+                    isLoading={isLoading}
+                    onSubmit={handleResetPassword}
+                    onCancel={() => setShowResetForm(false)}
+                  />
                 ) : (
-                  <form onSubmit={handleLogin} className="space-y-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="email">Email</Label>
-                      <Input 
-                        id="email"
-                        type="email"
-                        placeholder="you@example.com"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                        disabled={isLoading}
-                        className="bg-white border-white/20"
-                      />
-                    </div>
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <Label htmlFor="password">Password</Label>
-                        <Button 
-                          type="button" 
-                          variant="link" 
-                          size="sm" 
-                          className="text-xs p-0 h-auto text-primary hover:underline"
-                          onClick={() => setShowResetForm(true)}
-                        >
-                          Forgot password?
-                        </Button>
-                      </div>
-                      <Input 
-                        id="password"
-                        type="password"
-                        placeholder="••••••••"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                        disabled={isLoading}
-                        className="bg-white border-white/20"
-                      />
-                    </div>
-                    <Button type="submit" className="w-full" disabled={isLoading}>
-                      {isLoading ? (
-                        <>
-                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          Logging in...
-                        </>
-                      ) : "Login"}
-                    </Button>
-                  </form>
+                  <LoginForm
+                    email={email}
+                    setEmail={setEmail}
+                    password={password}
+                    setPassword={setPassword}
+                    isLoading={isLoading}
+                    onSubmit={handleLogin}
+                    onForgotPassword={() => setShowResetForm(true)}
+                  />
                 )}
               </CardContent>
               {!showResetForm && (
                 <CardFooter className="flex-col gap-4">
-                  <div className="relative w-full">
-                    <div className="absolute inset-0 flex items-center">
-                      <span className="w-full border-t border-white/20" />
-                    </div>
-                    <div className="relative flex justify-center text-xs">
-                      <span className="bg-card px-2 text-muted-foreground">
-                        Or continue with
-                      </span>
-                    </div>
-                  </div>
-                  <Button 
-                    variant="outline"
+                  <AuthDivider />
+                  <GoogleButton 
                     onClick={handleGoogleLogin}
-                    disabled={isLoading}
-                    className="w-full border-white/20"
-                  >
-                    {isLoading ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Connecting with Google...
-                      </>
-                    ) : "Login with Google"}
-                  </Button>
+                    isLoading={isLoading}
+                    isSignup={false}
+                  />
                 </CardFooter>
               )}
             </Card>
@@ -291,115 +212,28 @@ const Login = () => {
                 <CardDescription>Join our virtual classroom as a student or teacher</CardDescription>
               </CardHeader>
               <CardContent>
-                <form onSubmit={handleSignup} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="name">Full Name</Label>
-                    <Input 
-                      id="name"
-                      placeholder="John Doe"
-                      value={name}
-                      onChange={(e) => setName(e.target.value)}
-                      required
-                      disabled={isLoading}
-                      className="bg-white border-white/20"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-email">Email</Label>
-                    <Input 
-                      id="signup-email"
-                      type="email"
-                      placeholder="you@example.com"
-                      value={signupEmail}
-                      onChange={(e) => setSignupEmail(e.target.value)}
-                      required
-                      disabled={isLoading}
-                      className="bg-white border-white/20"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="signup-password">Password</Label>
-                    <Input 
-                      id="signup-password"
-                      type="password"
-                      placeholder="••••••••"
-                      value={signupPassword}
-                      onChange={(e) => setSignupPassword(e.target.value)}
-                      required
-                      disabled={isLoading}
-                      className="bg-white border-white/20"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="confirm-password">Confirm Password</Label>
-                    <Input 
-                      id="confirm-password"
-                      type="password"
-                      placeholder="••••••••"
-                      value={signupConfirmPassword}
-                      onChange={(e) => setSignupConfirmPassword(e.target.value)}
-                      required
-                      disabled={isLoading}
-                      className="bg-white border-white/20"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label>I am a...</Label>
-                    <RadioGroup value={role} onValueChange={(value) => setRole(value as UserRole)} className="grid grid-cols-2 gap-4 pt-2">
-                      <div>
-                        <RadioGroupItem value="student" id="student" className="peer sr-only" />
-                        <Label
-                          htmlFor="student"
-                          className="flex flex-col items-center justify-between rounded-md border-2 border-white/20 bg-white p-4 hover:bg-white/5 hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-                        >
-                          <span>Student</span>
-                        </Label>
-                      </div>
-                      <div>
-                        <RadioGroupItem value="teacher" id="teacher" className="peer sr-only" />
-                        <Label
-                          htmlFor="teacher"
-                          className="flex flex-col items-center justify-between rounded-md border-2 border-white/20 bg-white p-4 hover:bg-white/5 hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-                        >
-                          <span>Teacher</span>
-                        </Label>
-                      </div>
-                    </RadioGroup>
-                  </div>
-                  <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? (
-                      <>
-                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Creating account...
-                      </>
-                    ) : "Sign Up"}
-                  </Button>
-                </form>
+                <SignupForm
+                  name={name}
+                  setName={setName}
+                  email={signupEmail}
+                  setEmail={setSignupEmail}
+                  password={signupPassword}
+                  setPassword={setSignupPassword}
+                  confirmPassword={signupConfirmPassword}
+                  setConfirmPassword={setSignupConfirmPassword}
+                  role={role}
+                  setRole={setRole}
+                  isLoading={isLoading}
+                  onSubmit={handleSignup}
+                />
               </CardContent>
               <CardFooter className="flex-col gap-4">
-                <div className="relative w-full">
-                  <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t border-white/20" />
-                  </div>
-                  <div className="relative flex justify-center text-xs">
-                    <span className="bg-card px-2 text-muted-foreground">
-                      Or continue with
-                    </span>
-                  </div>
-                </div>
-                <Button 
-                  variant="outline" 
+                <AuthDivider />
+                <GoogleButton 
                   onClick={handleGoogleLogin}
-                  disabled={isLoading}
-                  className="w-full border-white/20"
-                >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Signing up with Google...
-                    </>
-                  ) : "Sign up with Google"}
-                </Button>
+                  isLoading={isLoading}
+                  isSignup={true}
+                />
               </CardFooter>
             </Card>
           </TabsContent>
