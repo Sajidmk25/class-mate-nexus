@@ -1,3 +1,4 @@
+
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -50,13 +51,17 @@ const Classroom = () => {
     } else {
       // Turn on video
       try {
+        console.log("Attempting to access camera...");
         const videoStream = await navigator.mediaDevices.getUserMedia({ 
           video: true,
           audio: isAudioOn 
         });
         
+        console.log("Camera access granted:", videoStream);
+        
         if (videoRef.current) {
           videoRef.current.srcObject = videoStream;
+          videoRef.current.muted = true; // Mute local video to prevent echo
           streamRef.current = videoStream;
           
           // If audio is already on, we need to keep track of both streams
@@ -107,7 +112,10 @@ const Classroom = () => {
       });
     } else {
       try {
+        console.log("Attempting to access microphone...");
         const audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        console.log("Microphone access granted:", audioStream);
+        
         audioStreamRef.current = audioStream;
         
         // If video is on, add the audio track to the existing stream
@@ -139,10 +147,13 @@ const Classroom = () => {
 
   // Request initial permissions on component mount
   useEffect(() => {
+    console.log("Classroom component mounted, checking for media devices...");
+    
     const requestInitialPermissions = async () => {
       try {
         // Check if the browser supports getUserMedia
         if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          console.error("Browser doesn't support getUserMedia API");
           toast({
             title: "Browser Not Supported",
             description: "Your browser doesn't support camera and microphone access.",
@@ -151,8 +162,29 @@ const Classroom = () => {
           return;
         }
         
-        // Just check permissions without turning anything on
-        await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+        console.log("Browser supports getUserMedia, checking permissions...");
+        
+        // Try to get device permissions
+        const devices = await navigator.mediaDevices.enumerateDevices();
+        console.log("Available devices:", devices);
+        
+        const hasVideoDevice = devices.some(device => device.kind === 'videoinput');
+        
+        if (!hasVideoDevice) {
+          console.warn("No video input devices found");
+          toast({
+            title: "No Camera Detected",
+            description: "No camera device was detected on your system.",
+            variant: "destructive"
+          });
+          return;
+        }
+        
+        // Check permissions without turning anything on yet
+        await navigator.permissions.query({ name: 'camera' as PermissionName });
+        await navigator.permissions.query({ name: 'microphone' as PermissionName });
+        
+        console.log("Permission check completed");
         setHasPermissionError(false);
       } catch (err) {
         console.warn("Initial permission check failed:", err);
@@ -161,6 +193,34 @@ const Classroom = () => {
     };
     
     requestInitialPermissions();
+    
+    // Automatically request camera access
+    const autoStartCamera = async () => {
+      try {
+        // Try auto-starting camera if not already on
+        if (!isVideoOn) {
+          await toggleVideo();
+        }
+      } catch (err) {
+        console.error("Failed to auto-start camera:", err);
+      }
+    };
+    
+    // Auto start with a slight delay to ensure component is fully mounted
+    const timerId = setTimeout(() => {
+      autoStartCamera();
+    }, 1000);
+    
+    return () => {
+      clearTimeout(timerId);
+      // Clean up media streams when component unmounts
+      if (streamRef.current) {
+        streamRef.current.getTracks().forEach(track => track.stop());
+      }
+      if (audioStreamRef.current) {
+        audioStreamRef.current.getTracks().forEach(track => track.stop());
+      }
+    };
   }, []);
 
   // Handle Gmail Invite
@@ -224,7 +284,7 @@ const Classroom = () => {
                     ref={videoRef}
                     autoPlay
                     playsInline
-                    muted={!isAudioOn}
+                    muted
                     className="w-full h-full object-cover"
                   />
                 ) : (
