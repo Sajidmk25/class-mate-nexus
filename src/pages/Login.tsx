@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -18,18 +17,15 @@ const Login = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<"login" | "signup">("login");
   
-  // Login form state
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   
-  // Signup form state
   const [signupEmail, setSignupEmail] = useState("");
   const [signupPassword, setSignupPassword] = useState("");
   const [signupConfirmPassword, setSignupConfirmPassword] = useState("");
   const [name, setName] = useState("");
   const [role, setRole] = useState<UserRole>("student");
   
-  // Check for signup query param and set active tab
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     if (params.get("signup") === "true") {
@@ -37,7 +33,6 @@ const Login = () => {
     }
   }, [location]);
   
-  // Redirect if user is already authenticated
   useEffect(() => {
     if (isAuthenticated) {
       navigate("/dashboard");
@@ -58,7 +53,6 @@ const Login = () => {
     setIsLoading(true);
     try {
       await login(email, password);
-      // Navigate is handled in the useEffect watching isAuthenticated
     } catch (error: any) {
       console.error("Login failed:", error);
       toast({
@@ -95,7 +89,6 @@ const Login = () => {
     setIsLoading(true);
     try {
       await signup(signupEmail, signupPassword, name, role);
-      // Navigate is handled in the useEffect watching isAuthenticated
     } catch (error: any) {
       console.error("Signup failed:", error);
       toast({
@@ -112,7 +105,6 @@ const Login = () => {
     setIsLoading(true);
     try {
       await loginWithGoogle(activeTab === "signup" ? role : undefined);
-      // The redirect will be handled by Supabase
     } catch (error: any) {
       console.error("Google login failed:", error);
       toast({
@@ -179,7 +171,6 @@ const Login = () => {
                   </Button>
                 </form>
               </CardContent>
-              {/* Google login button temporarily hidden until configured in Supabase 
               <CardFooter className="flex-col gap-4">
                 <div className="relative w-full">
                   <div className="absolute inset-0 flex items-center">
@@ -200,7 +191,6 @@ const Login = () => {
                   Login with Google
                 </Button>
               </CardFooter>
-              */}
             </Card>
           </TabsContent>
           
@@ -287,7 +277,6 @@ const Login = () => {
                   </Button>
                 </form>
               </CardContent>
-              {/* Google signup button temporarily hidden until configured in Supabase 
               <CardFooter className="flex-col gap-4">
                 <div className="relative w-full">
                   <div className="absolute inset-0 flex items-center">
@@ -308,7 +297,6 @@ const Login = () => {
                   Sign up with Google
                 </Button>
               </CardFooter>
-              */}
             </Card>
           </TabsContent>
         </Tabs>

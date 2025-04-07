@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
@@ -138,7 +137,6 @@ const Navigation = () => {
                 <Link to="/login">
                   <Button variant="outline" className="border-white/20 hover:bg-white/10 rounded-lg">Login</Button>
                 </Link>
-                {/* Google login button temporarily hidden until configured in Supabase 
                 <Button 
                   onClick={handleGoogleLogin}
                   disabled={isLoading}
@@ -151,12 +149,10 @@ const Navigation = () => {
                     </div>
                   )}
                 </Button>
-                */}
               </div>
             )}
           </div>
           
-          {/* Mobile menu button */}
           <div className="flex items-center sm:hidden">
             {isAuthenticated && (
               <>
@@ -217,7 +213,6 @@ const Navigation = () => {
         </div>
       </div>
 
-      {/* Mobile menu */}
       {isOpen && (
         <div className="sm:hidden bg-card border-t border-white/10 backdrop-blur-md">
           <div className="pt-2 pb-3 space-y-1">
@@ -233,7 +228,6 @@ const Navigation = () => {
                     <span className="ml-2">Login</span>
                   </div>
                 </Link>
-                {/* Google login button temporarily hidden until configured in Supabase 
                 <button
                   onClick={() => {
                     handleGoogleLogin();
@@ -246,7 +240,6 @@ const Navigation = () => {
                     <span className="ml-2">Sign in with Google</span>
                   </div>
                 </button>
-                */}
               </>
             )}
           </div>
