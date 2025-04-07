@@ -66,7 +66,7 @@ Deno.serve(async (req) => {
         .eq('id', user.id)
         .single()
 
-      const isTeacher = profileData?.role === 'teacher'
+      const isTeacher = profileData?.role === 'teacher' || profileData?.role === 'admin'
       
       let query = supabase.from('student_contacts').select(`
         *,
@@ -112,7 +112,7 @@ Deno.serve(async (req) => {
         .eq('id', user.id)
         .single()
 
-      const isTeacher = profileData?.role === 'teacher'
+      const isTeacher = profileData?.role === 'teacher' || profileData?.role === 'admin'
       
       if (!isTeacher) {
         return new Response(
