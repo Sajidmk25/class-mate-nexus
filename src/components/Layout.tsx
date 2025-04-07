@@ -4,19 +4,16 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { SidebarProvider, Sidebar, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarGroup, SidebarGroupContent, SidebarHeader, useSidebar, SidebarInset } from "@/components/ui/sidebar";
 import { Home, BookOpen, Video, MessageSquare, ClipboardList, Calendar, Users, BarChart, User, Sparkles } from "lucide-react";
-
 interface LayoutProps {
   children: ReactNode;
   title?: string;
 }
-
 const Layout = ({
   children,
   title
 }: LayoutProps) => {
   const location = useLocation();
   const showBackButton = location.pathname !== "/" && location.pathname !== "/dashboard";
-  
   return <SidebarProvider defaultOpen={true}>
       <div className="flex min-h-screen bg-background/90 w-full">
         <AppSidebar />
@@ -43,7 +40,6 @@ const Layout = ({
       </div>
     </SidebarProvider>;
 };
-
 const AppSidebar = () => {
   const location = useLocation();
   const {
@@ -90,7 +86,7 @@ const AppSidebar = () => {
       <SidebarHeader className="p-4">
         <Link to="/" className="flex items-center gap-2">
           <Sparkles className="h-6 w-6 text-accent animate-pulse-light" />
-          <span className="text-gradient font-bold text-xl font-playfair text-red-500">Teacher Portal</span>
+          <span className="text-gradient font-bold text-xl font-playfair text-red-500">Student Portal</span>
         </Link>
       </SidebarHeader>
       <SidebarContent>
@@ -111,5 +107,4 @@ const AppSidebar = () => {
       </SidebarContent>
     </Sidebar>;
 };
-
 export default Layout;
