@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
@@ -10,7 +9,6 @@ import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle } from "lucide-react";
 import { authService } from "@/services/auth.service";
 
-// Import the new component files
 import { LoginForm } from "@/components/auth/LoginForm";
 import { SignupForm } from "@/components/auth/SignupForm";
 import { PasswordResetForm } from "@/components/auth/PasswordResetForm";
@@ -50,7 +48,6 @@ const Login = () => {
     }
   }, [isAuthenticated, navigate]);
 
-  // Clear error message when switching tabs
   useEffect(() => {
     setErrorMessage(null);
     setShowResetForm(false);
@@ -93,13 +90,20 @@ const Login = () => {
       return;
     }
     
+    if (signupPassword.length < 6) {
+      setErrorMessage("Password must be at least 6 characters");
+      return;
+    }
+    
     setIsLoading(true);
     try {
       await signup(signupEmail, signupPassword, name, role);
       // Navigation is handled by the auth effect above
     } catch (error: any) {
       console.error("Signup failed:", error);
-      setErrorMessage(error.message || "Signup failed. Please check your information and try again.");
+      if (!error.message?.includes('already registered')) {
+        setErrorMessage(error.message || "Signup failed. Please check your information and try again.");
+      }
     } finally {
       setIsLoading(false);
     }

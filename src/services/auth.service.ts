@@ -44,7 +44,33 @@ export const authService = {
   
   async signup(email: string, password: string, name: string, role: UserRole) {
     try {
-      // Sign up directly with auto confirm
+      console.log("Signing up user:", email, name, role);
+      
+      // First check if user already exists
+      const { data: existingUser, error: checkError } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      // If login succeeds, user already exists and has the correct password
+      if (existingUser?.user) {
+        console.log("User already exists and credentials are correct, logging in");
+        toast({
+          title: "Logged in successfully",
+          description: `Welcome back! You already had an account with us.`,
+        });
+        return existingUser;
+      }
+
+      // If login fails for reasons other than "user not found", it's an actual error
+      if (checkError && !checkError.message.includes("Invalid login credentials")) {
+        console.error("Error checking for existing user:", checkError);
+        throw checkError;
+      }
+
+      console.log("User doesn't exist, creating new account");
+      
+      // User doesn't exist, create a new account
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
@@ -56,17 +82,24 @@ export const authService = {
             bio: role === 'teacher' 
               ? "Experienced educator with a passion for interactive learning." 
               : "Student with a passion for learning and collaboration."
-          }
+          },
+          // Set emailRedirectTo for email confirmation
+          emailRedirectTo: `${window.location.origin}/dashboard`
         }
       });
       
       if (error) {
+        console.error("Signup error:", error);
         throw error;
       }
       
-      // Auto-login after signup
+      // For development purposes, auto-login without email confirmation
       if (!data.session) {
         console.log("No session after signup, attempting auto-login");
+        
+        // Wait a brief moment to ensure the user is created in the database
+        await new Promise(resolve => setTimeout(resolve, 500));
+        
         const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
           email,
           password
@@ -74,6 +107,19 @@ export const authService = {
         
         if (loginError) {
           console.error("Auto-login after signup failed:", loginError);
+          
+          // Special case: If auto-login fails with "Email not confirmed", 
+          // we'll show a more user-friendly message but still consider the signup successful
+          if (loginError.message.includes("Email not confirmed")) {
+            toast({
+              title: "Account created successfully",
+              description: `Welcome to Virtual Classroom, ${name}! Please check your email to confirm your account.`,
+            });
+            
+            // Return the signup data even though login failed
+            return data;
+          }
+          
           throw loginError;
         }
         
@@ -94,32 +140,21 @@ export const authService = {
     } catch (error: any) {
       console.error("Signup error:", error);
       
-      // If the user already exists, try to log them in instead
-      if (error.message?.includes('already')) {
-        try {
-          console.log("User already exists, attempting to log in");
-          const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
-            email,
-            password
-          });
-          
-          if (loginError) {
-            console.error("Login after failed signup error:", loginError);
-            throw loginError;
-          }
-          
-          toast({
-            title: "Logged in successfully",
-            description: `Welcome back! You already had an account with us.`,
-          });
-          
-          return loginData;
-        } catch (loginError) {
-          throw loginError;
-        }
+      if (error.message?.includes('already registered')) {
+        toast({
+          title: "Account already exists",
+          description: "Please try logging in instead, or use a different email address.",
+          variant: "destructive",
+        });
       } else {
-        throw error;
+        toast({
+          title: "Signup failed",
+          description: error.message || "There was an issue creating your account. Please try again.",
+          variant: "destructive",
+        });
       }
+      
+      throw error;
     }
   },
   
