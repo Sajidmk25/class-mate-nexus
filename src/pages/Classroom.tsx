@@ -1,4 +1,3 @@
-
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -20,19 +19,28 @@ const Classroom = () => {
   const [isGroupsOpen, setIsGroupsOpen] = useState(false);
   const [isInviteOpen, setIsInviteOpen] = useState(false);
   const [isEndClassDialogOpen, setIsEndClassDialogOpen] = useState(false);
+  const [hasPermissionError, setHasPermissionError] = useState(false);
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
+  const audioStreamRef = useRef<MediaStream | null>(null);
   
   // Turn on/off video
   const toggleVideo = async () => {
     if (isVideoOn) {
       // Turn off video
       if (streamRef.current) {
-        streamRef.current.getTracks().forEach(track => track.stop());
+        streamRef.current.getTracks()
+          .filter(track => track.kind === 'video')
+          .forEach(track => track.stop());
       }
       if (videoRef.current) {
-        videoRef.current.srcObject = null;
+        // Keep the audio track if it's on
+        if (isAudioOn && audioStreamRef.current) {
+          videoRef.current.srcObject = audioStreamRef.current;
+        } else {
+          videoRef.current.srcObject = null;
+        }
       }
       setIsVideoOn(false);
       toast({
@@ -42,18 +50,33 @@ const Classroom = () => {
     } else {
       // Turn on video
       try {
-        const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+        const videoStream = await navigator.mediaDevices.getUserMedia({ 
+          video: true,
+          audio: isAudioOn 
+        });
+        
         if (videoRef.current) {
-          videoRef.current.srcObject = stream;
+          videoRef.current.srcObject = videoStream;
+          streamRef.current = videoStream;
+          
+          // If audio is already on, we need to keep track of both streams
+          if (isAudioOn && audioStreamRef.current) {
+            const audioTrack = audioStreamRef.current.getAudioTracks()[0];
+            if (audioTrack) {
+              videoStream.addTrack(audioTrack);
+            }
+          }
         }
-        streamRef.current = stream;
+        
         setIsVideoOn(true);
+        setHasPermissionError(false);
         toast({
           title: "Video On",
           description: "Your camera has been turned on."
         });
       } catch (err) {
         console.error("Error accessing camera:", err);
+        setHasPermissionError(true);
         toast({
           title: "Camera Access Denied",
           description: "Please allow camera access to use video features.",
@@ -65,12 +88,80 @@ const Classroom = () => {
   
   // Turn on/off audio
   const toggleAudio = async () => {
-    setIsAudioOn(!isAudioOn);
-    toast({
-      title: isAudioOn ? "Microphone Off" : "Microphone On",
-      description: isAudioOn ? "Your microphone has been muted." : "Your microphone has been unmuted."
-    });
+    if (isAudioOn) {
+      // Turn off audio
+      if (audioStreamRef.current) {
+        audioStreamRef.current.getTracks().forEach(track => track.stop());
+        audioStreamRef.current = null;
+      }
+      
+      // If video is still on, we just remove the audio track
+      if (isVideoOn && streamRef.current) {
+        streamRef.current.getAudioTracks().forEach(track => track.stop());
+      }
+      
+      setIsAudioOn(false);
+      toast({
+        title: "Microphone Off",
+        description: "Your microphone has been muted."
+      });
+    } else {
+      try {
+        const audioStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+        audioStreamRef.current = audioStream;
+        
+        // If video is on, add the audio track to the existing stream
+        if (isVideoOn && streamRef.current && videoRef.current) {
+          const audioTrack = audioStream.getAudioTracks()[0];
+          if (audioTrack) {
+            streamRef.current.addTrack(audioTrack);
+          }
+          videoRef.current.srcObject = streamRef.current;
+        }
+        
+        setIsAudioOn(true);
+        setHasPermissionError(false);
+        toast({
+          title: "Microphone On",
+          description: "Your microphone has been unmuted."
+        });
+      } catch (err) {
+        console.error("Error accessing microphone:", err);
+        setHasPermissionError(true);
+        toast({
+          title: "Microphone Access Denied",
+          description: "Please allow microphone access to use audio features.",
+          variant: "destructive"
+        });
+      }
+    }
   };
+
+  // Request initial permissions on component mount
+  useEffect(() => {
+    const requestInitialPermissions = async () => {
+      try {
+        // Check if the browser supports getUserMedia
+        if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+          toast({
+            title: "Browser Not Supported",
+            description: "Your browser doesn't support camera and microphone access.",
+            variant: "destructive"
+          });
+          return;
+        }
+        
+        // Just check permissions without turning anything on
+        await navigator.mediaDevices.getUserMedia({ audio: true, video: true });
+        setHasPermissionError(false);
+      } catch (err) {
+        console.warn("Initial permission check failed:", err);
+        setHasPermissionError(true);
+      }
+    };
+    
+    requestInitialPermissions();
+  }, []);
 
   // Handle Gmail Invite
   const handleInvite = () => {
@@ -98,6 +189,9 @@ const Classroom = () => {
     if (streamRef.current) {
       streamRef.current.getTracks().forEach(track => track.stop());
     }
+    if (audioStreamRef.current) {
+      audioStreamRef.current.getTracks().forEach(track => track.stop());
+    }
     toast({
       title: "Class Ended",
       description: "You have successfully ended the class."
@@ -110,6 +204,9 @@ const Classroom = () => {
     return () => {
       if (streamRef.current) {
         streamRef.current.getTracks().forEach(track => track.stop());
+      }
+      if (audioStreamRef.current) {
+        audioStreamRef.current.getTracks().forEach(track => track.stop());
       }
     };
   }, []);
@@ -127,7 +224,7 @@ const Classroom = () => {
                     ref={videoRef}
                     autoPlay
                     playsInline
-                    muted
+                    muted={!isAudioOn}
                     className="w-full h-full object-cover"
                   />
                 ) : (
@@ -138,6 +235,11 @@ const Classroom = () => {
                       </div>
                       <p className="text-gray-300">Camera is turned off</p>
                       <p className="text-xs text-gray-400 mt-1">Click the camera button to enable video</p>
+                      {hasPermissionError && (
+                        <p className="text-xs text-red-400 mt-2">
+                          Permission denied. Please check your browser settings.
+                        </p>
+                      )}
                     </div>
                   </div>
                 )}
