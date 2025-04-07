@@ -49,6 +49,7 @@ const HeroSection = () => {
             <Link to="/login">
               <Button size="lg" className="w-full sm:w-auto glass-card">Login</Button>
             </Link>
+            {/* Google login button temporarily hidden until configured in Supabase 
             <Button 
               size="lg" 
               className="w-full sm:w-auto"
@@ -57,6 +58,7 @@ const HeroSection = () => {
             >
               {isLoading ? "Signing in..." : "Sign in with Google"}
             </Button>
+            */}
           </div>
         )}
       </div>

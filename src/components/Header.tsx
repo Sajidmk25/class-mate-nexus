@@ -60,6 +60,7 @@ const Header = () => {
                 <Link to="/login">
                   <Button variant="outline" className="border-white/20 hover:bg-white/10">Login</Button>
                 </Link>
+                {/* Google login button temporarily hidden until configured in Supabase 
                 <Button 
                   onClick={handleGoogleLogin}
                   disabled={isLoading}
@@ -67,6 +68,7 @@ const Header = () => {
                 >
                   {isLoading ? "Signing in..." : "Sign in with Google"}
                 </Button>
+                */}
               </div>
             )}
           </div>

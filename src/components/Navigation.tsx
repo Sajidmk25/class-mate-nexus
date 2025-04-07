@@ -138,6 +138,7 @@ const Navigation = () => {
                 <Link to="/login">
                   <Button variant="outline" className="border-white/20 hover:bg-white/10 rounded-lg">Login</Button>
                 </Link>
+                {/* Google login button temporarily hidden until configured in Supabase 
                 <Button 
                   onClick={handleGoogleLogin}
                   disabled={isLoading}
@@ -150,6 +151,7 @@ const Navigation = () => {
                     </div>
                   )}
                 </Button>
+                */}
               </div>
             )}
           </div>
@@ -231,6 +233,7 @@ const Navigation = () => {
                     <span className="ml-2">Login</span>
                   </div>
                 </Link>
+                {/* Google login button temporarily hidden until configured in Supabase 
                 <button
                   onClick={() => {
                     handleGoogleLogin();
@@ -243,6 +246,7 @@ const Navigation = () => {
                     <span className="ml-2">Sign in with Google</span>
                   </div>
                 </button>
+                */}
               </>
             )}
           </div>

@@ -179,6 +179,7 @@ const Login = () => {
                   </Button>
                 </form>
               </CardContent>
+              {/* Google login button temporarily hidden until configured in Supabase 
               <CardFooter className="flex-col gap-4">
                 <div className="relative w-full">
                   <div className="absolute inset-0 flex items-center">
@@ -199,6 +200,7 @@ const Login = () => {
                   Login with Google
                 </Button>
               </CardFooter>
+              */}
             </Card>
           </TabsContent>
           
@@ -285,6 +287,7 @@ const Login = () => {
                   </Button>
                 </form>
               </CardContent>
+              {/* Google signup button temporarily hidden until configured in Supabase 
               <CardFooter className="flex-col gap-4">
                 <div className="relative w-full">
                   <div className="absolute inset-0 flex items-center">
@@ -305,6 +308,7 @@ const Login = () => {
                   Sign up with Google
                 </Button>
               </CardFooter>
+              */}
             </Card>
           </TabsContent>
         </Tabs>
