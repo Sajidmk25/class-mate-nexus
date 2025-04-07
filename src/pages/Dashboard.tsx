@@ -3,8 +3,11 @@ import { Link } from "react-router-dom";
 import Layout from "@/components/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { BookOpen, Video, MessageSquare, ClipboardList, Calendar, Users, BarChart } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
 
 const Dashboard = () => {
+  const { user } = useAuth();
+  
   // Sample data
   const upcomingClasses = [
     { id: 1, title: "Advanced Mathematics", time: "Today, 10:00 AM", students: 24 },
@@ -19,7 +22,7 @@ const Dashboard = () => {
   ];
 
   return (
-    <Layout title="Teacher Dashboard">
+    <Layout>
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
         <Card className="col-span-2">
           <CardHeader className="pb-2">
