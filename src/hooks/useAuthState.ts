@@ -12,7 +12,7 @@ export function useAuthState() {
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    // Set up Supabase auth state listener
+    // First set up the auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, currentSession) => {
         console.log("Auth state changed:", event, currentSession?.user?.id);
@@ -21,7 +21,6 @@ export function useAuthState() {
           setSession(currentSession);
           setSupabaseUser(currentSession.user);
           
-          // Convert Supabase user to our User format
           if (currentSession.user) {
             const userObj = mapSupabaseUserToUser(currentSession.user);
             setUser(userObj);
@@ -34,7 +33,7 @@ export function useAuthState() {
       }
     );
 
-    // Check for existing session
+    // Then check for existing session
     const initializeSession = async () => {
       try {
         const { data: { session: initialSession } } = await supabase.auth.getSession();
@@ -56,7 +55,7 @@ export function useAuthState() {
     
     initializeSession();
 
-    // Cleanup
+    // Clean up subscription on unmount
     return () => {
       subscription?.unsubscribe();
     };

@@ -197,9 +197,9 @@ export const authService = {
   
   async loginWithGoogle(role?: UserRole) {
     try {
-      // More reliable redirect URL generation
-      const origin = window.location.origin;
-      const redirectTo = `${origin}/dashboard`;
+      // Get window location dynamically to ensure correct redirect
+      const currentUrl = window.location.origin;
+      const redirectTo = `${currentUrl}/dashboard`;
       
       console.log("Google login - Redirect URL:", redirectTo);
       
@@ -211,7 +211,6 @@ export const authService = {
             access_type: 'offline',
             prompt: 'consent',
           },
-          // Explicitly set scopes
           scopes: 'email profile',
         }
       });
