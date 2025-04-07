@@ -217,8 +217,10 @@ export const authService = {
   
   async resetPassword(email: string) {
     try {
-      // Get the current domain for proper redirect
+      // Get the current origin for proper redirect
       const origin = window.location.origin;
+      
+      // Create a more reliable redirect URL
       const redirectTo = `${origin}/reset-password`;
       
       console.log("Reset password redirect URL:", redirectTo);

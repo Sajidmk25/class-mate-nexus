@@ -17,16 +17,22 @@ const ResetPassword = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
 
   // Check for hash fragment when component mounts
   useEffect(() => {
     const hashParams = new URLSearchParams(window.location.hash.substring(1));
-    if (!hashParams.get("access_token")) {
+    const token = hashParams.get("access_token");
+    setAccessToken(token);
+    
+    if (!token) {
       toast({
         title: "Invalid reset link",
         description: "This password reset link appears to be invalid or has expired.",
         variant: "destructive",
       });
+    } else {
+      console.log("Access token found in URL:", token);
     }
   }, []);
 
@@ -44,8 +50,24 @@ const ResetPassword = () => {
       return;
     }
 
+    if (!accessToken) {
+      setErrorMessage("Invalid reset link. Please request a new password reset email.");
+      return;
+    }
+
     setIsLoading(true);
     try {
+      // Set the session from the access token
+      const { error: sessionError } = await supabase.auth.setSession({
+        access_token: accessToken,
+        refresh_token: '',
+      });
+      
+      if (sessionError) {
+        throw sessionError;
+      }
+      
+      // Now update the user password
       const { error } = await supabase.auth.updateUser({ password });
       
       if (error) {
@@ -92,11 +114,13 @@ const ResetPassword = () => {
             <CardDescription>
               {isSuccess 
                 ? "Your password has been reset successfully. Redirecting to login..." 
-                : "Enter your new password below"}
+                : accessToken 
+                  ? "Enter your new password below" 
+                  : "Invalid reset link. Please request a new password reset email."}
             </CardDescription>
           </CardHeader>
           <CardContent>
-            {!isSuccess && (
+            {!isSuccess && accessToken && (
               <form onSubmit={handleResetPassword} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="password">New Password</Label>
@@ -133,6 +157,17 @@ const ResetPassword = () => {
                   ) : "Update Password"}
                 </Button>
               </form>
+            )}
+            {!isSuccess && !accessToken && (
+              <div className="py-4 text-center">
+                <p className="text-sm text-muted-foreground mb-4">Invalid or expired reset link.</p>
+                <Button 
+                  onClick={() => navigate('/login')}
+                  className="w-full"
+                >
+                  Return to Login
+                </Button>
+              </div>
             )}
             {isSuccess && (
               <div className="py-4 text-center">
