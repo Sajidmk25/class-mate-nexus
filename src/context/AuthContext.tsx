@@ -55,6 +55,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     // Set up Supabase auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, currentSession) => {
+        console.log("Auth state changed:", event, currentSession?.user?.id);
         setSession(currentSession);
         setSupabaseUser(currentSession?.user ?? null);
         
@@ -82,28 +83,34 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
     // Check for existing session
     const initializeSession = async () => {
-      const { data: { session: initialSession } } = await supabase.auth.getSession();
-      
-      if (initialSession?.user) {
-        setSession(initialSession);
-        setSupabaseUser(initialSession.user);
+      try {
+        const { data: { session: initialSession } } = await supabase.auth.getSession();
         
-        const userRole = initialSession.user.user_metadata.role as UserRole || 'student';
+        console.log("Initial session check:", initialSession?.user?.id);
         
-        const userObj: User = {
-          id: initialSession.user.id,
-          name: initialSession.user.user_metadata.name || initialSession.user.email?.split('@')[0] || 'User',
-          email: initialSession.user.email || '',
-          photoURL: initialSession.user.user_metadata.avatar_url || `https://i.pravatar.cc/150?img=${Math.floor(Math.random() * 70)}`,
-          role: userRole,
-          phone: initialSession.user.phone || '',
-          bio: initialSession.user.user_metadata.bio || ''
-        };
-        
-        setUser(userObj);
+        if (initialSession?.user) {
+          setSession(initialSession);
+          setSupabaseUser(initialSession.user);
+          
+          const userRole = initialSession.user.user_metadata.role as UserRole || 'student';
+          
+          const userObj: User = {
+            id: initialSession.user.id,
+            name: initialSession.user.user_metadata.name || initialSession.user.email?.split('@')[0] || 'User',
+            email: initialSession.user.email || '',
+            photoURL: initialSession.user.user_metadata.avatar_url || `https://i.pravatar.cc/150?img=${Math.floor(Math.random() * 70)}`,
+            role: userRole,
+            phone: initialSession.user.phone || '',
+            bio: initialSession.user.user_metadata.bio || ''
+          };
+          
+          setUser(userObj);
+        }
+      } catch (error) {
+        console.error("Error getting session:", error);
+      } finally {
+        setIsLoading(false);
       }
-      
-      setIsLoading(false);
     };
     
     initializeSession();
@@ -190,6 +197,10 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     try {
       setIsLoading(true);
       
+      // Use the Supabase URL
+      const redirectTo = `${window.location.origin}/dashboard`;
+      console.log("Redirect URL:", redirectTo);
+      
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
@@ -197,7 +208,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
             access_type: 'offline',
             prompt: 'consent',
           },
-          redirectTo: `${window.location.origin}/dashboard`
+          redirectTo
         }
       });
       

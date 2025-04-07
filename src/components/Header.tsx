@@ -2,7 +2,7 @@
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/context/AuthContext";
-import { Phone, LogOut } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { useState } from "react";
 import DonationDialog from "./DonationDialog";
 
@@ -34,10 +34,6 @@ const Header = () => {
             <span className="text-gradient font-bold text-xl">Sajid Mehmood</span>
           </div>
           <div className="flex items-center space-x-4">
-            <div className="flex items-center mr-4 text-gray-300">
-              <Phone size={16} className="mr-1" />
-              <span className="text-sm">+971 582424005</span>
-            </div>
             <Button 
               variant="outline" 
               onClick={() => setIsDonationOpen(true)}

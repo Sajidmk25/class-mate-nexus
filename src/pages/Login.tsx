@@ -9,6 +9,7 @@ import { UserRole } from "@/context/AuthContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { toast } from "@/hooks/use-toast";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -45,14 +46,26 @@ const Login = () => {
   
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email || !password) return;
+    if (!email || !password) {
+      toast({
+        title: "Missing information",
+        description: "Please enter your email and password",
+        variant: "destructive",
+      });
+      return;
+    }
     
     setIsLoading(true);
     try {
       await login(email, password);
-      navigate("/dashboard");
-    } catch (error) {
+      // Navigate is handled in the useEffect watching isAuthenticated
+    } catch (error: any) {
       console.error("Login failed:", error);
+      toast({
+        title: "Login failed",
+        description: error.message || "Please check your credentials and try again",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -62,19 +75,34 @@ const Login = () => {
     e.preventDefault();
     
     if (!signupEmail || !signupPassword || !name) {
+      toast({
+        title: "Missing information",
+        description: "Please fill out all required fields",
+        variant: "destructive",
+      });
       return;
     }
     
     if (signupPassword !== signupConfirmPassword) {
+      toast({
+        title: "Passwords don't match",
+        description: "Please make sure your passwords match",
+        variant: "destructive",
+      });
       return;
     }
     
     setIsLoading(true);
     try {
       await signup(signupEmail, signupPassword, name, role);
-      navigate("/dashboard");
-    } catch (error) {
+      // Navigate is handled in the useEffect watching isAuthenticated
+    } catch (error: any) {
       console.error("Signup failed:", error);
+      toast({
+        title: "Signup failed",
+        description: error.message || "Please check your information and try again",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -84,8 +112,14 @@ const Login = () => {
     setIsLoading(true);
     try {
       await loginWithGoogle(activeTab === "signup" ? role : undefined);
-    } catch (error) {
+      // The redirect will be handled by Supabase
+    } catch (error: any) {
       console.error("Google login failed:", error);
+      toast({
+        title: "Google login failed",
+        description: error.message || "Please try again or use another method",
+        variant: "destructive",
+      });
     } finally {
       setIsLoading(false);
     }
@@ -122,7 +156,7 @@ const Login = () => {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
-                      className="bg-secondary/50 border-white/20"
+                      className="bg-white border-white/20"
                     />
                   </div>
                   <div className="space-y-2">
@@ -137,7 +171,7 @@ const Login = () => {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
-                      className="bg-secondary/50 border-white/20"
+                      className="bg-white border-white/20"
                     />
                   </div>
                   <Button type="submit" className="w-full" disabled={isLoading}>
@@ -184,7 +218,7 @@ const Login = () => {
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       required
-                      className="bg-secondary/50 border-white/20"
+                      className="bg-white border-white/20"
                     />
                   </div>
                   <div className="space-y-2">
@@ -196,7 +230,7 @@ const Login = () => {
                       value={signupEmail}
                       onChange={(e) => setSignupEmail(e.target.value)}
                       required
-                      className="bg-secondary/50 border-white/20"
+                      className="bg-white border-white/20"
                     />
                   </div>
                   <div className="space-y-2">
@@ -208,7 +242,7 @@ const Login = () => {
                       value={signupPassword}
                       onChange={(e) => setSignupPassword(e.target.value)}
                       required
-                      className="bg-secondary/50 border-white/20"
+                      className="bg-white border-white/20"
                     />
                   </div>
                   <div className="space-y-2">
@@ -220,7 +254,7 @@ const Login = () => {
                       value={signupConfirmPassword}
                       onChange={(e) => setSignupConfirmPassword(e.target.value)}
                       required
-                      className="bg-secondary/50 border-white/20"
+                      className="bg-white border-white/20"
                     />
                   </div>
                   <div className="space-y-2">
@@ -230,7 +264,7 @@ const Login = () => {
                         <RadioGroupItem value="student" id="student" className="peer sr-only" />
                         <Label
                           htmlFor="student"
-                          className="flex flex-col items-center justify-between rounded-md border-2 border-white/20 bg-secondary/50 p-4 hover:bg-white/5 hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+                          className="flex flex-col items-center justify-between rounded-md border-2 border-white/20 bg-white p-4 hover:bg-white/5 hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
                         >
                           <span>Student</span>
                         </Label>
@@ -239,7 +273,7 @@ const Login = () => {
                         <RadioGroupItem value="teacher" id="teacher" className="peer sr-only" />
                         <Label
                           htmlFor="teacher"
-                          className="flex flex-col items-center justify-between rounded-md border-2 border-white/20 bg-secondary/50 p-4 hover:bg-white/5 hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
+                          className="flex flex-col items-center justify-between rounded-md border-2 border-white/20 bg-white p-4 hover:bg-white/5 hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
                         >
                           <span>Teacher</span>
                         </Label>

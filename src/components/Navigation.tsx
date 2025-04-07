@@ -10,7 +10,6 @@ import {
   LogOut,
   User,
   Settings,
-  Phone,
   Sparkles,
   BookOpen
 } from "lucide-react";
@@ -73,11 +72,6 @@ const Navigation = () => {
           </div>
           
           <div className="hidden sm:ml-6 sm:flex sm:items-center sm:space-x-4">
-            <div className="flex items-center mr-4 text-gray-300 hover:text-primary transition-colors">
-              <Phone size={16} className="mr-1" />
-              <span className="text-sm">+971 582424005</span>
-            </div>
-            
             {isAuthenticated ? (
               <div className="flex items-center space-x-4">
                 <Link to="/account" className="text-gray-300 hover:text-primary transition-colors relative">
@@ -225,11 +219,6 @@ const Navigation = () => {
       {isOpen && (
         <div className="sm:hidden bg-card border-t border-white/10 backdrop-blur-md">
           <div className="pt-2 pb-3 space-y-1">
-            <div className="flex items-center mb-4 pl-3">
-              <Phone size={16} className="mr-1 text-accent" />
-              <span className="text-sm text-gray-300">+971 582424005</span>
-            </div>
-            
             {!isAuthenticated && (
               <>
                 <Link
