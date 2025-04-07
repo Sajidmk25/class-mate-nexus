@@ -1,9 +1,10 @@
+
 import { ReactNode } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { SidebarProvider, Sidebar, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarGroup, SidebarGroupContent, SidebarHeader, useSidebar, SidebarInset } from "@/components/ui/sidebar";
-import { Home, BookOpen, Video, MessageSquare, ClipboardList, Calendar, Users, BarChart, User, Sparkles } from "lucide-react";
+import { Home, BookOpen, Video, MessageSquare, ClipboardList, Calendar, Users, BarChart, User, Sparkles, Mail } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 
 interface LayoutProps {
@@ -54,43 +55,61 @@ const AppSidebar = () => {
   const {
     isMobile
   } = useSidebar();
-  const navItems = [{
-    name: "Dashboard",
-    path: "/dashboard",
-    icon: Home
-  }, {
-    name: "Courses",
-    path: "/courses",
-    icon: BookOpen
-  }, {
-    name: "Classroom",
-    path: "/classroom",
-    icon: Video
-  }, {
-    name: "Messages",
-    path: "/messages",
-    icon: MessageSquare
-  }, {
-    name: "Assignments",
-    path: "/assignments",
-    icon: ClipboardList
-  }, {
-    name: "Schedule",
-    path: "/schedule",
-    icon: Calendar
-  }, {
-    name: "Study Groups",
-    path: "/study-groups",
-    icon: Users
-  }, {
-    name: "Grades",
-    path: "/grades",
-    icon: BarChart
-  }, {
-    name: "Profile",
-    path: "/profile",
-    icon: User
-  }];
+  const { user } = useAuth();
+  
+  const navItems = [
+    {
+      name: "Dashboard",
+      path: "/dashboard",
+      icon: Home
+    }, 
+    {
+      name: "Courses",
+      path: "/courses",
+      icon: BookOpen
+    }, 
+    {
+      name: "Classroom",
+      path: "/classroom",
+      icon: Video
+    }, 
+    {
+      name: "Messages",
+      path: "/messages",
+      icon: MessageSquare
+    }, 
+    {
+      name: "Assignments",
+      path: "/assignments",
+      icon: ClipboardList
+    }, 
+    {
+      name: "Schedule",
+      path: "/schedule",
+      icon: Calendar
+    }, 
+    {
+      name: "Study Groups",
+      path: "/study-groups",
+      icon: Users
+    }, 
+    {
+      name: "Grades",
+      path: "/grades",
+      icon: BarChart
+    },
+    {
+      name: "Contacts",
+      path: "/contacts",
+      icon: Mail
+    },
+    {
+      name: "Profile",
+      path: "/profile",
+      icon: User
+    }
+  ];
+  
   return <Sidebar>
       <SidebarHeader className="p-4">
         <Link to="/" className="flex items-center gap-2">

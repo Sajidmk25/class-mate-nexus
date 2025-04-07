@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -24,6 +23,7 @@ import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import Login from "./pages/Login";
 import ResetPassword from "./pages/ResetPassword";
+import Contacts from "./pages/Contacts";
 
 const queryClient = new QueryClient();
 
@@ -126,6 +126,7 @@ const App = () => (
                 </ProtectedRoute>
               } 
             />
+            <Route path="/contacts" element={<ProtectedRoute><Contacts /></ProtectedRoute>} />
             <Route path="*" element={<NotFound />} />
           </Routes>
           <AIAssistant />

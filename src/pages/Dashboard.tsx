@@ -1,9 +1,9 @@
-
 import { Link } from "react-router-dom";
 import Layout from "@/components/Layout";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { BookOpen, Video, MessageSquare, ClipboardList, Calendar, Users, BarChart } from "lucide-react";
+import { BookOpen, Video, MessageSquare, ClipboardList, Calendar, Users, BarChart, Mail } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
+import { Button } from "@/components/ui/button";
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -20,6 +20,9 @@ const Dashboard = () => {
     { id: 2, title: "Physics Lab Report", course: "Introduction to Physics", due: "In 3 days", submissions: 8 },
     { id: 3, title: "Programming Assignment", course: "Computer Science Fundamentals", due: "In 5 days", submissions: 12 },
   ];
+
+  // Determine if user is a student
+  const isStudent = user?.role !== 'teacher';
 
   return (
     <Layout>
@@ -73,6 +76,18 @@ const Dashboard = () => {
                 <span className="text-sm font-medium">Assignments</span>
               </Link>
             </div>
+            
+            {/* Contact Teachers button for students */}
+            {isStudent && (
+              <div className="mt-4">
+                <Link to="/contacts">
+                  <Button variant="outline" className="w-full flex items-center justify-center gap-2">
+                    <Mail className="h-4 w-4" />
+                    Contact Teachers
+                  </Button>
+                </Link>
+              </div>
+            )}
           </CardContent>
         </Card>
       </div>
