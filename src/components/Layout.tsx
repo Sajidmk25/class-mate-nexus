@@ -4,16 +4,24 @@ import { Button } from "@/components/ui/button";
 import { ArrowLeft } from "lucide-react";
 import { SidebarProvider, Sidebar, SidebarContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton, SidebarGroup, SidebarGroupContent, SidebarHeader, useSidebar, SidebarInset } from "@/components/ui/sidebar";
 import { Home, BookOpen, Video, MessageSquare, ClipboardList, Calendar, Users, BarChart, User, Sparkles } from "lucide-react";
+import { useAuth } from "@/context/AuthContext";
+
 interface LayoutProps {
   children: ReactNode;
   title?: string;
 }
+
 const Layout = ({
   children,
   title
 }: LayoutProps) => {
   const location = useLocation();
+  const { user } = useAuth();
   const showBackButton = location.pathname !== "/" && location.pathname !== "/dashboard";
+
+  // Dynamically set dashboard title based on user role
+  const dashboardTitle = title || (user?.role === 'teacher' ? 'Teacher Dashboard' : 'Student Dashboard');
+
   return <SidebarProvider defaultOpen={true}>
       <div className="flex min-h-screen bg-background/90 w-full">
         <AppSidebar />
@@ -27,8 +35,8 @@ const Layout = ({
                       Back to Dashboard
                     </Button>
                   </Link>}
-                {title && <h1 className="text-3xl font-bold text-gradient-header font-playfair">
-                    {title === "Student Dashboard" ? "Teacher Dashboard" : title}
+                {dashboardTitle && <h1 className="text-3xl font-bold text-gradient-header font-playfair">
+                    {dashboardTitle}
                   </h1>}
               </div>
             </div>
@@ -40,6 +48,7 @@ const Layout = ({
       </div>
     </SidebarProvider>;
 };
+
 const AppSidebar = () => {
   const location = useLocation();
   const {
@@ -107,4 +116,5 @@ const AppSidebar = () => {
       </SidebarContent>
     </Sidebar>;
 };
+
 export default Layout;
