@@ -1,8 +1,7 @@
-
 import { useState, useRef, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Video, Mic, MicOff, VideoOff, Users, MessageSquare, Settings, Share2, ScreenShare } from "lucide-react";
+import { Video, Mic, MicOff, VideoOff, MessageSquare, Settings, Share2, ScreenShare } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import { toast } from "@/hooks/use-toast";
 import Layout from "@/components/Layout";
@@ -11,11 +10,6 @@ const Classroom = () => {
   const { user } = useAuth();
   const [isVideoOn, setIsVideoOn] = useState(false);
   const [isAudioOn, setIsAudioOn] = useState(false);
-  const [participants, setParticipants] = useState([
-    { id: 1, name: "Sarah Johnson", role: "Teacher", isSpeaking: true },
-    { id: 2, name: "Michael Chen", role: "Student", isSpeaking: false },
-    { id: 3, name: "Emma Williams", role: "Student", isSpeaking: false },
-  ]);
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const streamRef = useRef<MediaStream | null>(null);
@@ -188,98 +182,44 @@ const Classroom = () => {
             </div>
           </div>
           
-          {/* Participants List */}
+          {/* Class Controls - Replacing Participants section */}
           <div>
-            <div className="flex justify-between items-center mb-3">
-              <h2 className="text-xl font-bold text-gradient font-playfair">Participants</h2>
-              <span className="bg-white/10 text-sm px-2 py-1 rounded-full">4</span>
-            </div>
+            <h3 className="text-lg font-bold mb-3 text-gradient font-playfair">Class Controls</h3>
             
-            <Card className="p-0 bg-gradient-to-br from-secondary/30 to-background border border-white/10">
-              <div className="divide-y divide-white/10">
-                <div className="p-3 bg-gradient-to-r from-primary/20 to-accent/20">
-                  <div className="flex items-center">
-                    <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary/30 to-accent/30 flex items-center justify-center mr-3 border border-white/10">
-                      {user?.name?.charAt(0) || "U"}
-                    </div>
-                    <div>
-                      <p className="font-medium">{user?.name || "You"} (You)</p>
-                      <p className="text-sm text-gray-400 capitalize">{user?.role || "Student"}</p>
-                    </div>
-                    {isAudioOn && (
-                      <div className="ml-auto">
-                        <Mic className="h-4 w-4 text-primary" />
-                      </div>
-                    )}
-                  </div>
-                </div>
-                
-                {participants.map(participant => (
-                  <div key={participant.id} className="p-3 hover:bg-white/5 transition-colors">
-                    <div className="flex items-center">
-                      <div className={`w-10 h-10 rounded-full ${participant.isSpeaking ? 'bg-accent/20 ring-2 ring-accent' : 'bg-secondary'} flex items-center justify-center mr-3`}>
-                        {participant.name.charAt(0)}
-                      </div>
-                      <div>
-                        <p className="font-medium flex items-center">
-                          {participant.name}
-                          {participant.role === "Teacher" && (
-                            <span className="ml-2 badge badge-primary">Instructor</span>
-                          )}
-                        </p>
-                        <p className="text-sm text-gray-400">{participant.role}</p>
-                      </div>
-                      {participant.isSpeaking && (
-                        <div className="ml-auto">
-                          <Mic className="h-4 w-4 text-accent animate-pulse" />
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </Card>
-            
-            <div className="mt-6">
-              <h3 className="text-lg font-bold mb-3 text-gradient font-playfair">Class Controls</h3>
-              
+            <Card className="p-4 bg-gradient-to-br from-secondary/30 to-background border border-white/10 mb-6">
               <div className="grid grid-cols-2 gap-3">
                 <Button variant="outline" className="border-white/10 hover:bg-white/10 flex items-center gap-2 justify-start">
                   <Share2 className="h-4 w-4 text-primary" />
-                  <span>Invite</span>
-                </Button>
-                <Button variant="outline" className="border-white/10 hover:bg-white/10 flex items-center gap-2 justify-start">
-                  <Users className="h-4 w-4 text-primary" />
-                  <span>Groups</span>
+                  <span>Share Gmail Invite</span>
                 </Button>
                 <Button variant="outline" className="border-white/10 hover:bg-white/10 flex items-center gap-2 justify-start">
                   <Settings className="h-4 w-4 text-primary" />
                   <span>Settings</span>
                 </Button>
-                <Button variant="destructive" className="flex items-center gap-2 justify-start">
+                <Button variant="destructive" className="col-span-2 flex items-center gap-2 justify-center">
                   <span>End Class</span>
                 </Button>
               </div>
-              
-              <div className="mt-6">
-                <h3 className="text-md font-medium mb-2 text-primary">Connection Quality</h3>
-                <div className="w-full bg-gray-700/30 rounded-full h-2 mb-4">
-                  <div className="bg-gradient-to-r from-primary to-accent h-2 rounded-full w-4/5"></div>
-                </div>
-                <div className="text-sm">
-                  <p className="flex justify-between py-1">
-                    <span className="text-gray-400">Network:</span>
-                    <span className="font-medium text-gray-200">Excellent</span>
-                  </p>
-                  <p className="flex justify-between py-1">
-                    <span className="text-gray-400">Resolution:</span>
-                    <span>HD (720p)</span>
-                  </p>
-                  <p className="flex justify-between py-1">
-                    <span className="text-gray-400">Encryption:</span>
-                    <span>Enabled</span>
-                  </p>
-                </div>
+            </Card>
+            
+            <div className="mt-6">
+              <h3 className="text-md font-medium mb-2 text-primary">Connection Quality</h3>
+              <div className="w-full bg-gray-700/30 rounded-full h-2 mb-4">
+                <div className="bg-gradient-to-r from-primary to-accent h-2 rounded-full w-4/5"></div>
+              </div>
+              <div className="text-sm">
+                <p className="flex justify-between py-1">
+                  <span className="text-gray-400">Network:</span>
+                  <span className="font-medium text-gray-200">Excellent</span>
+                </p>
+                <p className="flex justify-between py-1">
+                  <span className="text-gray-400">Resolution:</span>
+                  <span>HD (720p)</span>
+                </p>
+                <p className="flex justify-between py-1">
+                  <span className="text-gray-400">Encryption:</span>
+                  <span>Enabled</span>
+                </p>
               </div>
             </div>
           </div>
