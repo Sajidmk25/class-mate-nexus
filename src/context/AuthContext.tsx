@@ -197,8 +197,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     try {
       setIsLoading(true);
       
-      // Use the Supabase URL
-      const redirectTo = `${window.location.origin}/dashboard`;
+      // Get the current domain, adjusting for localhost
+      const domain = window.location.hostname === 'localhost' 
+        ? `${window.location.protocol}//${window.location.host}`
+        : window.location.origin;
+      
+      // Create redirect URL that will handle the return from Google auth
+      const redirectTo = `${domain}/dashboard`;
       console.log("Redirect URL:", redirectTo);
       
       const { data, error } = await supabase.auth.signInWithOAuth({
