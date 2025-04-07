@@ -1,13 +1,15 @@
 
 import { useAuth } from '@/context/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
 import { useCallback } from 'react';
+
+// API base URL - change this to your Node.js server in production
+const API_BASE_URL = 'http://localhost:5000';
 
 export function useApi() {
   const { session } = useAuth();
   
   /**
-   * Make an authenticated request to your Supabase Edge Function
+   * Make an authenticated request to your Node.js Express API
    */
   const callApi = useCallback(async <T>(endpoint: string, options: {
     method?: 'GET' | 'POST' | 'PUT' | 'DELETE';
@@ -17,17 +19,26 @@ export function useApi() {
     
     try {
       console.log(`Calling API: ${endpoint} with method: ${method}`);
-      const { data, error } = await supabase.functions.invoke(`api${endpoint}`, {
+      
+      const headers: HeadersInit = {
+        'Content-Type': 'application/json'
+      };
+      
+      // Add authorization header if session exists
+      if (session) {
+        headers['Authorization'] = `Bearer ${session.access_token}`;
+      }
+      
+      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
         method,
-        body,
-        headers: session ? {
-          Authorization: `Bearer ${session.access_token}`
-        } : undefined
+        headers,
+        body: body ? JSON.stringify(body) : undefined,
       });
       
-      if (error) {
-        console.error(`API error (${endpoint}):`, error);
-        throw error;
+      const data = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.error || 'An unknown error occurred');
       }
       
       return { data: data as T, error: null };
