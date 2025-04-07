@@ -6,7 +6,8 @@ import { getAuthUser } from '../_shared/auth.ts'
 const supabaseUrl = Deno.env.get('SUPABASE_URL') as string
 const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') as string
 
-Deno.serve(async (req) => {
+// Export default handler function that can be imported by the main router
+export default async function handler(req: Request) {
   // Handle CORS
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders })
@@ -156,4 +157,4 @@ Deno.serve(async (req) => {
       { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     )
   }
-})
+}

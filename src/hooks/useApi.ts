@@ -16,6 +16,7 @@ export function useApi() {
     const { method = 'GET', body } = options;
     
     try {
+      console.log(`Calling API: ${endpoint} with method: ${method}`);
       const { data, error } = await supabase.functions.invoke(`api${endpoint}`, {
         method,
         body,
@@ -24,7 +25,10 @@ export function useApi() {
         } : undefined
       });
       
-      if (error) throw error;
+      if (error) {
+        console.error(`API error (${endpoint}):`, error);
+        throw error;
+      }
       
       return { data: data as T, error: null };
     } catch (err: any) {

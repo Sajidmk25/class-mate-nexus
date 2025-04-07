@@ -6,12 +6,14 @@ import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, GET, PUT, DELETE, OPTIONS',
 }
 
 // Define routes and handlers
 const routes = {
   '/api/hello': handleHello,
   '/api/user': handleUser,
+  '/api/contacts': handleContacts,
 }
 
 serve(async (req) => {
@@ -110,4 +112,11 @@ async function handleUser(req: Request) {
       }
     }
   );
+}
+
+// Handler for /api/contacts route - Forward to the contacts handler
+async function handleContacts(req: Request) {
+  // Import the contacts handler function dynamically
+  const { default: contactsHandler } = await import('./contacts/index.ts');
+  return await contactsHandler(req);
 }
