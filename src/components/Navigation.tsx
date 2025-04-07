@@ -10,13 +10,13 @@ import {
   Calendar, Users, GraduationCap, User, Settings, Phone, 
   ShieldAlert, LogOut
 } from "lucide-react";
-import { useWindowSize } from "@/hooks/use-mobile";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { UserRole } from "@/types/auth.types";
 
 const Navigation = () => {
   const location = useLocation();
   const { user, logout } = useAuth();
-  const { isMobile } = useWindowSize();
+  const isMobile = useIsMobile();
   const [activeItem, setActiveItem] = useState("");
   
   // Helper function to get appropriate navigation items based on user role
