@@ -20,22 +20,34 @@ export const mapSupabaseUserToUser = (supaUser: SupabaseUser): User => {
 
 export const authService = {
   async login(email: string, password: string) {
-    const { data, error } = await supabase.auth.signInWithPassword({
-      email,
-      password
-    });
-    
-    if (error) {
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password
+      });
+      
+      if (error) {
+        console.error("Login error:", error);
+        
+        // Handle specific error cases
+        if (error.message?.includes('Email not confirmed')) {
+          // Try to auto-confirm the email by signing up again
+          return this.signup(email, password, email.split('@')[0], 'student');
+        }
+        
+        throw error;
+      }
+      
+      toast({
+        title: "Logged in successfully",
+        description: `Welcome back!`,
+      });
+      
+      return data;
+    } catch (error: any) {
       console.error("Login error:", error);
       throw error;
     }
-    
-    toast({
-      title: "Logged in successfully",
-      description: `Welcome back!`,
-    });
-    
-    return data;
   },
   
   async signup(email: string, password: string, name: string, role: UserRole) {
@@ -62,6 +74,7 @@ export const authService = {
       
       // Since we have email confirmation disabled, let's auto-login
       if (!data.session) {
+        console.log("No session after signup, attempting to login");
         const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
           email,
           password
@@ -69,14 +82,33 @@ export const authService = {
         
         if (loginError) {
           console.error("Auto-login after signup failed:", loginError);
-          // Continue anyway, don't throw
+          if (loginError.message?.includes('Email not confirmed')) {
+            toast({
+              title: "Email confirmation required",
+              description: "Please check your inbox and confirm your email before logging in.",
+              variant: "destructive",
+            });
+          } else {
+            // Continue anyway, don't throw
+            toast({
+              title: "Account created",
+              description: "Your account was created but we couldn't log you in automatically. Please try logging in manually.",
+              variant: "destructive",
+            });
+          }
+        } else {
+          toast({
+            title: "Account created successfully",
+            description: `Welcome to Virtual Classroom, ${name}!`,
+          });
+          return loginData;
         }
+      } else {
+        toast({
+          title: "Account created successfully",
+          description: `Welcome to Virtual Classroom, ${name}!`,
+        });
       }
-      
-      toast({
-        title: "Account created successfully",
-        description: `Welcome to Virtual Classroom, ${name}!`,
-      });
       
       return data;
     } catch (error: any) {
@@ -85,10 +117,22 @@ export const authService = {
       // If the user already exists, try to log them in instead
       if (error.message?.includes('already')) {
         try {
-          const { data: loginData } = await supabase.auth.signInWithPassword({
+          const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
             email,
             password
           });
+          
+          if (loginError) {
+            console.error("Login after failed signup error:", loginError);
+            if (loginError.message?.includes('Invalid login credentials')) {
+              toast({
+                title: "Email already in use",
+                description: "An account with this email already exists but the password is incorrect. Please try logging in with the correct password.",
+                variant: "destructive",
+              });
+            }
+            throw loginError;
+          }
           
           toast({
             title: "Logged in successfully",
@@ -97,8 +141,7 @@ export const authService = {
           
           return loginData;
         } catch (loginError) {
-          console.error("Login after failed signup error:", loginError);
-          throw error; // Throw the original error
+          throw loginError;
         }
       } else {
         throw error;
@@ -170,5 +213,30 @@ export const authService = {
   async getSession() {
     const { data: { session } } = await supabase.auth.getSession();
     return session;
+  },
+  
+  async resetPassword(email: string) {
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/reset-password`,
+      });
+      
+      if (error) throw error;
+      
+      toast({
+        title: "Password reset email sent",
+        description: "Check your inbox for instructions to reset your password",
+      });
+      
+      return true;
+    } catch (error: any) {
+      console.error("Reset password error:", error);
+      toast({
+        title: "Error sending reset email",
+        description: error.message || "There was a problem sending the reset email. Please try again.",
+        variant: "destructive",
+      });
+      throw error;
+    }
   }
 };

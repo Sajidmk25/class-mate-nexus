@@ -12,6 +12,7 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "@/hooks/use-toast";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { AlertCircle, Loader2 } from "lucide-react";
+import { authService } from "@/services/auth.service";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -30,6 +31,8 @@ const Login = () => {
   const [role, setRole] = useState<UserRole>("student");
   
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [resetEmail, setResetEmail] = useState("");
+  const [showResetForm, setShowResetForm] = useState(false);
   
   useEffect(() => {
     const params = new URLSearchParams(location.search);
@@ -47,6 +50,7 @@ const Login = () => {
   // Clear error message when switching tabs
   useEffect(() => {
     setErrorMessage(null);
+    setShowResetForm(false);
   }, [activeTab]);
   
   const handleLogin = async (e: React.FormEvent) => {
@@ -64,7 +68,9 @@ const Login = () => {
       // Navigation is handled by the auth effect above
     } catch (error: any) {
       console.error("Login failed:", error);
-      setErrorMessage(error.message || "Login failed. Please check your credentials and try again.");
+      setErrorMessage(error.message === "Invalid login credentials" 
+        ? "Invalid email or password. Please check your credentials and try again." 
+        : (error.message || "Login failed. Please check your credentials and try again."));
     } finally {
       setIsLoading(false);
     }
@@ -109,6 +115,31 @@ const Login = () => {
       setIsLoading(false);
     }
   };
+
+  const handleResetPassword = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setErrorMessage(null);
+    
+    if (!resetEmail) {
+      setErrorMessage("Please enter your email");
+      return;
+    }
+    
+    setIsLoading(true);
+    try {
+      await authService.resetPassword(resetEmail);
+      setShowResetForm(false);
+      toast({
+        title: "Password reset email sent",
+        description: "Check your email for a link to reset your password",
+      });
+    } catch (error: any) {
+      console.error("Password reset failed:", error);
+      setErrorMessage(error.message || "Password reset failed. Please try again later.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
   
   return (
     <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-background to-background/90 px-4">
@@ -138,71 +169,118 @@ const Login = () => {
                 <CardDescription>Login to your account to continue</CardDescription>
               </CardHeader>
               <CardContent>
-                <form onSubmit={handleLogin} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email</Label>
-                    <Input 
-                      id="email"
-                      type="email"
-                      placeholder="you@example.com"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                      disabled={isLoading}
-                      className="bg-white border-white/20"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      <Label htmlFor="password">Password</Label>
-                      <a href="#" className="text-xs text-primary hover:underline">Forgot password?</a>
+                {showResetForm ? (
+                  <form onSubmit={handleResetPassword} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="reset-email">Email</Label>
+                      <Input 
+                        id="reset-email"
+                        type="email"
+                        placeholder="you@example.com"
+                        value={resetEmail}
+                        onChange={(e) => setResetEmail(e.target.value)}
+                        required
+                        disabled={isLoading}
+                        className="bg-white border-white/20"
+                      />
                     </div>
-                    <Input 
-                      id="password"
-                      type="password"
-                      placeholder="••••••••"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required
-                      disabled={isLoading}
-                      className="bg-white border-white/20"
-                    />
+                    <div className="flex gap-2">
+                      <Button 
+                        type="button" 
+                        variant="outline" 
+                        className="flex-1"
+                        onClick={() => setShowResetForm(false)}
+                        disabled={isLoading}
+                      >
+                        Cancel
+                      </Button>
+                      <Button type="submit" className="flex-1" disabled={isLoading}>
+                        {isLoading ? (
+                          <>
+                            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                            Sending...
+                          </>
+                        ) : "Send reset email"}
+                      </Button>
+                    </div>
+                  </form>
+                ) : (
+                  <form onSubmit={handleLogin} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="email">Email</Label>
+                      <Input 
+                        id="email"
+                        type="email"
+                        placeholder="you@example.com"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        required
+                        disabled={isLoading}
+                        className="bg-white border-white/20"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <div className="flex items-center justify-between">
+                        <Label htmlFor="password">Password</Label>
+                        <Button 
+                          type="button" 
+                          variant="link" 
+                          size="sm" 
+                          className="text-xs p-0 h-auto text-primary hover:underline"
+                          onClick={() => setShowResetForm(true)}
+                        >
+                          Forgot password?
+                        </Button>
+                      </div>
+                      <Input 
+                        id="password"
+                        type="password"
+                        placeholder="••••••••"
+                        value={password}
+                        onChange={(e) => setPassword(e.target.value)}
+                        required
+                        disabled={isLoading}
+                        className="bg-white border-white/20"
+                      />
+                    </div>
+                    <Button type="submit" className="w-full" disabled={isLoading}>
+                      {isLoading ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Logging in...
+                        </>
+                      ) : "Login"}
+                    </Button>
+                  </form>
+                )}
+              </CardContent>
+              {!showResetForm && (
+                <CardFooter className="flex-col gap-4">
+                  <div className="relative w-full">
+                    <div className="absolute inset-0 flex items-center">
+                      <span className="w-full border-t border-white/20" />
+                    </div>
+                    <div className="relative flex justify-center text-xs">
+                      <span className="bg-card px-2 text-muted-foreground">
+                        Or continue with
+                      </span>
+                    </div>
                   </div>
-                  <Button type="submit" className="w-full" disabled={isLoading}>
+                  <Button 
+                    variant="outline"
+                    onClick={handleGoogleLogin}
+                    disabled={isLoading}
+                    className="w-full border-white/20"
+                  >
                     {isLoading ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Logging in...
+                        Connecting with Google...
                       </>
-                    ) : "Login"}
+                    ) : "Login with Google"}
                   </Button>
-                </form>
-              </CardContent>
-              <CardFooter className="flex-col gap-4">
-                <div className="relative w-full">
-                  <div className="absolute inset-0 flex items-center">
-                    <span className="w-full border-t border-white/20" />
-                  </div>
-                  <div className="relative flex justify-center text-xs">
-                    <span className="bg-card px-2 text-muted-foreground">
-                      Or continue with
-                    </span>
-                  </div>
-                </div>
-                <Button 
-                  variant="outline"
-                  onClick={handleGoogleLogin}
-                  disabled={isLoading}
-                  className="w-full border-white/20"
-                >
-                  {isLoading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Connecting with Google...
-                    </>
-                  ) : "Login with Google"}
-                </Button>
-              </CardFooter>
+                </CardFooter>
+              )}
             </Card>
           </TabsContent>
           
