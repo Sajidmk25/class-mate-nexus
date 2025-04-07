@@ -74,6 +74,7 @@ export const SignupForm = ({
           disabled={isLoading}
           className="bg-white border-white/20"
         />
+        <p className="text-xs text-gray-500">Must be at least 6 characters</p>
       </div>
       <div className="space-y-2">
         <Label htmlFor="confirm-password">Confirm Password</Label>

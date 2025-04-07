@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAuth } from "@/context/AuthContext";
@@ -97,11 +98,15 @@ const Login = () => {
     
     setIsLoading(true);
     try {
+      console.log("Starting signup process");
       await signup(signupEmail, signupPassword, name, role);
+      console.log("Signup completed successfully");
       // Navigation is handled by the auth effect above
     } catch (error: any) {
       console.error("Signup failed:", error);
-      if (!error.message?.includes('already registered')) {
+      if (error.message?.includes('different password')) {
+        setErrorMessage("An account with this email already exists. Please use a different email or try to reset your password.");
+      } else if (!error.message?.includes('already registered')) {
         setErrorMessage(error.message || "Signup failed. Please check your information and try again.");
       }
     } finally {
