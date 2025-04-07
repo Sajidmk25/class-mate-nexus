@@ -12,8 +12,8 @@ const Footer = () => {
           <div>
             <h3 className="text-lg font-semibold mb-4 text-gradient">Contact Us</h3>
             <ul className="space-y-2">
-              <li className="text-gray-400 bg-slate-50">info@sajidmk.com</li>
-              <li className="text-black-400 rounded-lg">+971 582424005</li>
+              <li className="text-black-400 bg-slate-500">info@sajidmk.com</li>
+              <li className="text-black-400 rounded-lg bg-slate-500">+971 582424005</li>
             </ul>
           </div>
         </div>
