@@ -1,11 +1,9 @@
-
 const Footer = () => {
-  return (
-    <footer className="py-12 bg-secondary/50 backdrop-blur-md text-white border-t border-white/10">
+  return <footer className="py-12 bg-secondary/50 backdrop-blur-md text-white border-t border-white/10">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           <div>
-            <h3 className="text-lg font-semibold mb-4 text-gradient">Sajid Mehmood</h3>
+            <h3 className="text-lg font-semibold mb-4 text-gradient text-zinc-950">Virtual Classrom</h3>
             <p className="text-gray-400">
               Making virtual education accessible and engaging for everyone.
             </p>
@@ -24,8 +22,6 @@ const Footer = () => {
           <p>&copy; 2025 Sajid Mehmood. All rights reserved.</p>
         </div>
       </div>
-    </footer>
-  );
+    </footer>;
 };
-
 export default Footer;
