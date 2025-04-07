@@ -292,5 +292,83 @@ export const authService = {
       });
       throw error;
     }
+  },
+  
+  async createUserAccount(email: string, password: string, name: string, role: UserRole, metadata?: Record<string, any>) {
+    try {
+      console.log("Admin creating account for:", email, name, role);
+      
+      const defaultMetadata = {
+        name,
+        role,
+        avatar_url: `https://i.pravatar.cc/150?img=${Math.floor(Math.random() * 70)}`,
+        bio: role === 'teacher' 
+          ? "Experienced educator with a passion for interactive learning." 
+          : "Student with a passion for learning and collaboration."
+      };
+      
+      // Merge provided metadata with defaults
+      const userMetadata = { ...defaultMetadata, ...(metadata || {}) };
+      
+      // Create user through the edge function (which will use service role key)
+      const { data: { user }, error } = await supabase.functions.invoke('/admin/create-user', {
+        body: {
+          email,
+          password,
+          metadata: userMetadata
+        }
+      });
+      
+      if (error) {
+        console.error("Admin create user error:", error);
+        throw error;
+      }
+      
+      toast({
+        title: "Account created successfully",
+        description: `New ${role} account created for ${name}`,
+      });
+      
+      return user;
+    } catch (error: any) {
+      console.error("Admin create user error:", error);
+      toast({
+        title: "Account creation failed",
+        description: error.message || "There was an issue creating the account",
+        variant: "destructive",
+      });
+      throw error;
+    }
+  },
+  
+  async resetUserPassword(userId: string, newPassword: string) {
+    try {
+      const { error } = await supabase.functions.invoke('/admin/reset-password', {
+        body: {
+          userId,
+          newPassword
+        }
+      });
+      
+      if (error) {
+        console.error("Admin reset password error:", error);
+        throw error;
+      }
+      
+      toast({
+        title: "Password reset successful",
+        description: "The user's password has been updated",
+      });
+      
+      return true;
+    } catch (error: any) {
+      console.error("Admin reset password error:", error);
+      toast({
+        title: "Password reset failed",
+        description: error.message || "There was an issue resetting the password",
+        variant: "destructive",
+      });
+      throw error;
+    }
   }
 };
