@@ -10,6 +10,8 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { toast } from "@/hooks/use-toast";
+import { Alert, AlertDescription } from "@/components/ui/alert";
+import { AlertCircle, Loader2 } from "lucide-react";
 
 const Login = () => {
   const navigate = useNavigate();
@@ -27,6 +29,8 @@ const Login = () => {
   const [name, setName] = useState("");
   const [role, setRole] = useState<UserRole>("student");
   
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  
   useEffect(() => {
     const params = new URLSearchParams(location.search);
     if (params.get("signup") === "true") {
@@ -39,28 +43,28 @@ const Login = () => {
       navigate("/dashboard");
     }
   }, [isAuthenticated, navigate]);
+
+  // Clear error message when switching tabs
+  useEffect(() => {
+    setErrorMessage(null);
+  }, [activeTab]);
   
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMessage(null);
+    
     if (!email || !password) {
-      toast({
-        title: "Missing information",
-        description: "Please enter your email and password",
-        variant: "destructive",
-      });
+      setErrorMessage("Please enter your email and password");
       return;
     }
     
     setIsLoading(true);
     try {
       await login(email, password);
+      // Navigation is handled by the auth effect above
     } catch (error: any) {
       console.error("Login failed:", error);
-      toast({
-        title: "Login failed",
-        description: error.message || "Please check your credentials and try again",
-        variant: "destructive",
-      });
+      setErrorMessage(error.message || "Login failed. Please check your credentials and try again.");
     } finally {
       setIsLoading(false);
     }
@@ -68,35 +72,25 @@ const Login = () => {
   
   const handleSignup = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMessage(null);
     
     if (!signupEmail || !signupPassword || !name) {
-      toast({
-        title: "Missing information",
-        description: "Please fill out all required fields",
-        variant: "destructive",
-      });
+      setErrorMessage("Please fill out all required fields");
       return;
     }
     
     if (signupPassword !== signupConfirmPassword) {
-      toast({
-        title: "Passwords don't match",
-        description: "Please make sure your passwords match",
-        variant: "destructive",
-      });
+      setErrorMessage("Passwords don't match");
       return;
     }
     
     setIsLoading(true);
     try {
       await signup(signupEmail, signupPassword, name, role);
+      // Navigation is handled by the auth effect above
     } catch (error: any) {
       console.error("Signup failed:", error);
-      toast({
-        title: "Signup failed",
-        description: error.message || "Please check your information and try again",
-        variant: "destructive",
-      });
+      setErrorMessage(error.message || "Signup failed. Please check your information and try again.");
     } finally {
       setIsLoading(false);
     }
@@ -104,15 +98,13 @@ const Login = () => {
   
   const handleGoogleLogin = async () => {
     setIsLoading(true);
+    setErrorMessage(null);
+    
     try {
       await loginWithGoogle(activeTab === "signup" ? role : undefined);
     } catch (error: any) {
       console.error("Google login failed:", error);
-      toast({
-        title: "Google login failed",
-        description: error.message || "Please try again or use another method",
-        variant: "destructive",
-      });
+      setErrorMessage(error.message || "Google login failed. Please try again or use another method.");
     } finally {
       setIsLoading(false);
     }
@@ -125,6 +117,13 @@ const Login = () => {
           <h1 className="text-3xl font-bold text-gradient">Virtual Classroom</h1>
           <p className="mt-2 text-gray-400">Join our modern education platform</p>
         </div>
+        
+        {errorMessage && (
+          <Alert variant="destructive" className="mb-4 animate-in fade-in">
+            <AlertCircle className="h-4 w-4" />
+            <AlertDescription>{errorMessage}</AlertDescription>
+          </Alert>
+        )}
         
         <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "login" | "signup")} className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-6">
@@ -149,6 +148,7 @@ const Login = () => {
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       required
+                      disabled={isLoading}
                       className="bg-white border-white/20"
                     />
                   </div>
@@ -164,11 +164,17 @@ const Login = () => {
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
                       required
+                      disabled={isLoading}
                       className="bg-white border-white/20"
                     />
                   </div>
                   <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? "Logging in..." : "Login"}
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Logging in...
+                      </>
+                    ) : "Login"}
                   </Button>
                 </form>
               </CardContent>
@@ -189,7 +195,12 @@ const Login = () => {
                   disabled={isLoading}
                   className="w-full border-white/20"
                 >
-                  Login with Google
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Connecting with Google...
+                    </>
+                  ) : "Login with Google"}
                 </Button>
               </CardFooter>
             </Card>
@@ -211,6 +222,7 @@ const Login = () => {
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       required
+                      disabled={isLoading}
                       className="bg-white border-white/20"
                     />
                   </div>
@@ -223,6 +235,7 @@ const Login = () => {
                       value={signupEmail}
                       onChange={(e) => setSignupEmail(e.target.value)}
                       required
+                      disabled={isLoading}
                       className="bg-white border-white/20"
                     />
                   </div>
@@ -235,6 +248,7 @@ const Login = () => {
                       value={signupPassword}
                       onChange={(e) => setSignupPassword(e.target.value)}
                       required
+                      disabled={isLoading}
                       className="bg-white border-white/20"
                     />
                   </div>
@@ -247,6 +261,7 @@ const Login = () => {
                       value={signupConfirmPassword}
                       onChange={(e) => setSignupConfirmPassword(e.target.value)}
                       required
+                      disabled={isLoading}
                       className="bg-white border-white/20"
                     />
                   </div>
@@ -274,7 +289,12 @@ const Login = () => {
                     </RadioGroup>
                   </div>
                   <Button type="submit" className="w-full" disabled={isLoading}>
-                    {isLoading ? "Creating account..." : "Sign Up"}
+                    {isLoading ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Creating account...
+                      </>
+                    ) : "Sign Up"}
                   </Button>
                 </form>
               </CardContent>
@@ -295,7 +315,12 @@ const Login = () => {
                   disabled={isLoading}
                   className="w-full border-white/20"
                 >
-                  Sign up with Google
+                  {isLoading ? (
+                    <>
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                      Signing up with Google...
+                    </>
+                  ) : "Sign up with Google"}
                 </Button>
               </CardFooter>
             </Card>

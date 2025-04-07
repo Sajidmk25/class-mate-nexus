@@ -26,6 +26,7 @@ export const authService = {
     });
     
     if (error) {
+      console.error("Login error:", error);
       throw error;
     }
     
@@ -38,31 +39,71 @@ export const authService = {
   },
   
   async signup(email: string, password: string, name: string, role: UserRole) {
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          name,
-          role,
-          avatar_url: `https://i.pravatar.cc/150?img=${Math.floor(Math.random() * 70)}`,
-          bio: role === 'teacher' 
-            ? "Experienced educator with a passion for interactive learning." 
-            : "Student with a passion for learning and collaboration."
+    try {
+      // First try sign up
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            name,
+            role,
+            avatar_url: `https://i.pravatar.cc/150?img=${Math.floor(Math.random() * 70)}`,
+            bio: role === 'teacher' 
+              ? "Experienced educator with a passion for interactive learning." 
+              : "Student with a passion for learning and collaboration."
+          }
+        }
+      });
+      
+      if (error) {
+        throw error;
+      }
+      
+      // Since we have email confirmation disabled, let's auto-login
+      if (!data.session) {
+        const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
+          email,
+          password
+        });
+        
+        if (loginError) {
+          console.error("Auto-login after signup failed:", loginError);
+          // Continue anyway, don't throw
         }
       }
-    });
-    
-    if (error) {
-      throw error;
+      
+      toast({
+        title: "Account created successfully",
+        description: `Welcome to Virtual Classroom, ${name}!`,
+      });
+      
+      return data;
+    } catch (error: any) {
+      console.error("Signup error:", error);
+      
+      // If the user already exists, try to log them in instead
+      if (error.message?.includes('already')) {
+        try {
+          const { data: loginData } = await supabase.auth.signInWithPassword({
+            email,
+            password
+          });
+          
+          toast({
+            title: "Logged in successfully",
+            description: `Welcome back! You already had an account with us.`,
+          });
+          
+          return loginData;
+        } catch (loginError) {
+          console.error("Login after failed signup error:", loginError);
+          throw error; // Throw the original error
+        }
+      } else {
+        throw error;
+      }
     }
-    
-    toast({
-      title: "Account created successfully",
-      description: `Welcome to EduConnect, ${name}!`,
-    });
-    
-    return data;
   },
   
   async loginWithGoogle(role?: UserRole) {
