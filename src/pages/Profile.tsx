@@ -18,6 +18,10 @@ import {
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import PrivacySettingsForm from "@/components/account/PrivacySettingsForm";
+import PasswordChangeForm from "@/components/account/PasswordChangeForm";
+import NotificationSettings from "@/components/account/NotificationSettings";
+import LinkedAccountsForm from "@/components/account/LinkedAccountsForm";
 
 const Profile = () => {
   const { user, updateProfile } = useAuth();
@@ -34,6 +38,11 @@ const Profile = () => {
   const [uploadDialog, setUploadDialog] = useState(false);
   const [uploadTab, setUploadTab] = useState("computer");
   const [driveUrl, setDriveUrl] = useState("");
+  
+  const [privacyDialogOpen, setPrivacyDialogOpen] = useState(false);
+  const [passwordDialogOpen, setPasswordDialogOpen] = useState(false);
+  const [notificationsDialogOpen, setNotificationsDialogOpen] = useState(false);
+  const [linkedAccountsDialogOpen, setLinkedAccountsDialogOpen] = useState(false);
 
   useEffect(() => {
     if (user) {
@@ -350,7 +359,20 @@ const Profile = () => {
                 <p className="text-sm text-gray-500 mb-3">
                   Control how your profile information is displayed
                 </p>
-                <Button variant="outline" className="w-full">Manage Privacy Settings</Button>
+                <Dialog open={privacyDialogOpen} onOpenChange={setPrivacyDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" className="w-full">Manage Privacy Settings</Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[500px]">
+                    <DialogHeader>
+                      <DialogTitle>Privacy Settings</DialogTitle>
+                      <DialogDescription>
+                        Control how your profile information is displayed to others
+                      </DialogDescription>
+                    </DialogHeader>
+                    <PrivacySettingsForm />
+                  </DialogContent>
+                </Dialog>
               </div>
               
               <div>
@@ -358,7 +380,20 @@ const Profile = () => {
                 <p className="text-sm text-gray-500 mb-3">
                   Update your password regularly for security
                 </p>
-                <Button variant="outline" className="w-full">Change Password</Button>
+                <Dialog open={passwordDialogOpen} onOpenChange={setPasswordDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" className="w-full">Change Password</Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[500px]">
+                    <DialogHeader>
+                      <DialogTitle>Change Password</DialogTitle>
+                      <DialogDescription>
+                        Update your password to keep your account secure
+                      </DialogDescription>
+                    </DialogHeader>
+                    <PasswordChangeForm />
+                  </DialogContent>
+                </Dialog>
               </div>
               
               <div>
@@ -366,7 +401,22 @@ const Profile = () => {
                 <p className="text-sm text-gray-500 mb-3">
                   Set preferences for emails and notifications
                 </p>
-                <Button variant="outline" className="w-full">Notification Settings</Button>
+                <Dialog open={notificationsDialogOpen} onOpenChange={setNotificationsDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" className="w-full">Notification Settings</Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[600px]">
+                    <DialogHeader>
+                      <DialogTitle>Notification Settings</DialogTitle>
+                      <DialogDescription>
+                        Set preferences for how and when you receive notifications
+                      </DialogDescription>
+                    </DialogHeader>
+                    <div className="mt-4">
+                      <NotificationSettings />
+                    </div>
+                  </DialogContent>
+                </Dialog>
               </div>
               
               <div>
@@ -374,7 +424,20 @@ const Profile = () => {
                 <p className="text-sm text-gray-500 mb-3">
                   Connect your social and external accounts
                 </p>
-                <Button variant="outline" className="w-full">Manage Linked Accounts</Button>
+                <Dialog open={linkedAccountsDialogOpen} onOpenChange={setLinkedAccountsDialogOpen}>
+                  <DialogTrigger asChild>
+                    <Button variant="outline" className="w-full">Manage Linked Accounts</Button>
+                  </DialogTrigger>
+                  <DialogContent className="sm:max-w-[500px]">
+                    <DialogHeader>
+                      <DialogTitle>Linked Accounts</DialogTitle>
+                      <DialogDescription>
+                        Connect your social and external accounts for easier sign-in
+                      </DialogDescription>
+                    </DialogHeader>
+                    <LinkedAccountsForm />
+                  </DialogContent>
+                </Dialog>
               </div>
             </CardContent>
           </Card>
