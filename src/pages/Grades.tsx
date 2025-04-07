@@ -1,217 +1,183 @@
 
-import { BarChart } from "lucide-react";
 import Layout from "@/components/Layout";
-import PageContent from "@/components/PageContent";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Progress } from "@/components/ui/progress";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
 import { 
-  ResponsiveContainer,
-  BarChart as RechartsBarChart,
-  Bar,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  Legend
-} from "recharts";
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow
+} from "@/components/ui/table";
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 const Grades = () => {
-  const courses = [
-    {
-      id: 1,
-      name: "Advanced Mathematics",
-      grade: 92,
-      progress: 65,
-      assignments: [
-        { name: "Quiz 1", grade: 88 },
-        { name: "Quiz 2", grade: 92 },
-        { name: "Quiz 3", grade: 95 },
-        { name: "Midterm", grade: 91 },
-        { name: "Problem Set 1", grade: 94 },
-      ]
-    },
-    {
-      id: 2,
-      name: "Introduction to Physics",
-      grade: 86,
-      progress: 42,
-      assignments: [
-        { name: "Lab 1", grade: 90 },
-        { name: "Quiz 1", grade: 82 },
-        { name: "Lab 2", grade: 88 },
-        { name: "Midterm", grade: 84 },
-      ]
-    },
-    {
-      id: 3,
-      name: "Computer Science Fundamentals",
-      grade: 94,
-      progress: 78,
-      assignments: [
-        { name: "Programming Assignment 1", grade: 96 },
-        { name: "Quiz 1", grade: 92 },
-        { name: "Programming Assignment 2", grade: 98 },
-        { name: "Midterm", grade: 90 },
-      ]
-    },
-    {
-      id: 4,
-      name: "Biology 101",
-      grade: 84,
-      progress: 30,
-      assignments: [
-        { name: "Lab Report 1", grade: 87 },
-        { name: "Quiz 1", grade: 78 },
-        { name: "Group Project", grade: 92 },
-      ]
-    },
-  ];
-
-  const gradeData = courses.map(course => ({
-    name: course.name.split(' ').slice(0, 2).join(' '), // Shorten the name for the chart
-    grade: course.grade
-  }));
-
-  const overallGPA = (courses.reduce((sum, course) => sum + course.grade, 0) / courses.length / 20).toFixed(2);
-
+  const [studentId, setStudentId] = useState("");
+  const [courseName, setCourseName] = useState("");
+  const [assignmentName, setAssignmentName] = useState("");
+  const [grade, setGrade] = useState("");
+  const [addedGrades, setAddedGrades] = useState<{
+    studentId: string;
+    courseName: string;
+    assignmentName: string;
+    grade: string;
+  }[]>([]);
+  
+  const { toast } = useToast();
+  
+  const handleAddGrade = () => {
+    // Validation
+    if (!studentId || !courseName || !assignmentName || !grade) {
+      toast({
+        title: "Missing information",
+        description: "Please fill in all fields",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    // Add grade to list
+    const newGrade = {
+      studentId,
+      courseName,
+      assignmentName, 
+      grade
+    };
+    
+    setAddedGrades([...addedGrades, newGrade]);
+    
+    // Clear form
+    setStudentId("");
+    setCourseName("");
+    setAssignmentName("");
+    setGrade("");
+    
+    // Show success notification
+    toast({
+      title: "Grade added",
+      description: `Grade of ${grade}% added for student ${studentId}`,
+    });
+  };
+  
   return (
     <Layout title="Grades">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2">
-          <Card className="mb-6">
+          <Card>
             <CardHeader>
-              <CardTitle>Grade Overview</CardTitle>
+              <CardTitle>Add Student Grade</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="h-80">
-                <ResponsiveContainer width="100%" height="100%">
-                  <RechartsBarChart
-                    data={gradeData}
-                    margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
-                  >
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis domain={[0, 100]} />
-                    <Tooltip 
-                      formatter={(value) => [`${value}%`, 'Grade']}
-                      labelFormatter={(label) => `Course: ${label}`}
+              <div className="grid gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="studentId">Student ID</Label>
+                    <Input 
+                      id="studentId"
+                      placeholder="Enter student ID"
+                      value={studentId}
+                      onChange={(e) => setStudentId(e.target.value)}
                     />
-                    <Legend />
-                    <Bar dataKey="grade" name="Current Grade" fill="#2563EB" radius={[4, 4, 0, 0]} />
-                  </RechartsBarChart>
-                </ResponsiveContainer>
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="courseName">Course Name</Label>
+                    <Input 
+                      id="courseName"
+                      placeholder="Enter course name"
+                      value={courseName}
+                      onChange={(e) => setCourseName(e.target.value)}
+                    />
+                  </div>
+                </div>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="assignmentName">Assignment Name</Label>
+                    <Input 
+                      id="assignmentName"
+                      placeholder="Enter assignment name"
+                      value={assignmentName}
+                      onChange={(e) => setAssignmentName(e.target.value)}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="grade">Grade (%)</Label>
+                    <Input 
+                      id="grade"
+                      placeholder="Enter grade percentage"
+                      value={grade}
+                      onChange={(e) => setGrade(e.target.value)}
+                      type="number"
+                      min="0"
+                      max="100"
+                    />
+                  </div>
+                </div>
+                
+                <Button onClick={handleAddGrade} className="w-full">Add Grade</Button>
               </div>
             </CardContent>
           </Card>
           
-          <Card>
-            <CardHeader>
-              <CardTitle>Course Grades</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-6">
-                {courses.map((course) => (
-                  <div key={course.id}>
-                    <div className="flex justify-between items-baseline mb-2">
-                      <h3 className="font-medium">{course.name}</h3>
-                      <div className="text-right">
-                        <span className="text-2xl font-bold">{course.grade}%</span>
-                        <span className="text-sm text-gray-500 ml-1">
-                          ({course.grade >= 90 ? 'A' : course.grade >= 80 ? 'B' : course.grade >= 70 ? 'C' : course.grade >= 60 ? 'D' : 'F'})
-                        </span>
-                      </div>
-                    </div>
-                    <div className="mb-2">
-                      <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-                        <div 
-                          className="h-full bg-brand-blue" 
-                          style={{ width: `${course.grade}%` }}
-                        />
-                      </div>
-                    </div>
-                    <div className="text-sm text-gray-500 flex justify-between">
-                      <span>Course progress: {course.progress}%</span>
-                      <span>{course.assignments.length} assignments</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </CardContent>
-          </Card>
+          {addedGrades.length > 0 && (
+            <Card className="mt-6">
+              <CardHeader>
+                <CardTitle>Recently Added Grades</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Student ID</TableHead>
+                      <TableHead>Course</TableHead>
+                      <TableHead>Assignment</TableHead>
+                      <TableHead className="text-right">Grade</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {addedGrades.map((item, index) => (
+                      <TableRow key={index}>
+                        <TableCell>{item.studentId}</TableCell>
+                        <TableCell>{item.courseName}</TableCell>
+                        <TableCell>{item.assignmentName}</TableCell>
+                        <TableCell className="text-right font-medium">{item.grade}%</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          )}
         </div>
         
         <div>
-          <Card className="mb-6">
-            <CardHeader>
-              <CardTitle>Performance Summary</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="text-center mb-6">
-                <h3 className="text-sm text-gray-500 mb-1">Current GPA</h3>
-                <div className="text-4xl font-bold">{overallGPA}</div>
-                <div className="text-sm text-gray-500 mt-1">out of 4.0</div>
-              </div>
-              
-              <div className="space-y-4">
-                <div>
-                  <div className="flex justify-between mb-1">
-                    <span className="text-sm font-medium">Overall Grade</span>
-                    <span className="text-sm font-medium">
-                      {Math.round(courses.reduce((sum, course) => sum + course.grade, 0) / courses.length)}%
-                    </span>
-                  </div>
-                  <Progress value={Math.round(courses.reduce((sum, course) => sum + course.grade, 0) / courses.length)} className="h-2" />
-                </div>
-                
-                <div>
-                  <div className="flex justify-between mb-1">
-                    <span className="text-sm font-medium">Overall Progress</span>
-                    <span className="text-sm font-medium">
-                      {Math.round(courses.reduce((sum, course) => sum + course.progress, 0) / courses.length)}%
-                    </span>
-                  </div>
-                  <Progress value={Math.round(courses.reduce((sum, course) => sum + course.progress, 0) / courses.length)} className="h-2" />
-                </div>
-                
-                <div>
-                  <div className="flex justify-between mb-1">
-                    <span className="text-sm font-medium">Assignments Completed</span>
-                    <span className="text-sm font-medium">
-                      {courses.reduce((sum, course) => sum + course.assignments.length, 0)} total
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-          
           <Card>
             <CardHeader>
-              <CardTitle>Recent Grades</CardTitle>
+              <CardTitle>Grading Guidelines</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-3">
-                {courses.flatMap(course => 
-                  course.assignments.slice(0, 1).map((assignment, i) => (
-                    <div key={`${course.id}-${i}`} className="flex justify-between items-center p-2 hover:bg-gray-50 rounded-md">
-                      <div>
-                        <p className="font-medium">{assignment.name}</p>
-                        <p className="text-sm text-gray-500">{course.name}</p>
-                      </div>
-                      <div className={`text-lg font-bold ${
-                        assignment.grade >= 90 ? 'text-green-600' : 
-                        assignment.grade >= 80 ? 'text-green-500' : 
-                        assignment.grade >= 70 ? 'text-yellow-500' : 
-                        'text-red-500'
-                      }`}>
-                        {assignment.grade}%
-                      </div>
-                    </div>
-                  ))
-                )}
-                <div className="text-center mt-3">
-                  <Button variant="link">View All Grades</Button>
+              <div className="space-y-4">
+                <div>
+                  <h3 className="font-medium mb-1">Grade Scale</h3>
+                  <ul className="text-sm text-gray-500 space-y-1">
+                    <li>A: 90-100%</li>
+                    <li>B: 80-89%</li>
+                    <li>C: 70-79%</li>
+                    <li>D: 60-69%</li>
+                    <li>F: Below 60%</li>
+                  </ul>
+                </div>
+                
+                <div>
+                  <h3 className="font-medium mb-1">Instructions</h3>
+                  <p className="text-sm text-gray-500">
+                    Enter the student's ID, course name, assignment name, and grade percentage.
+                    All grades are saved temporarily for this session only.
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -221,8 +187,5 @@ const Grades = () => {
     </Layout>
   );
 };
-
-// Added import for Button component
-import { Button } from "@/components/ui/button";
 
 export default Grades;
