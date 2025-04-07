@@ -1,4 +1,3 @@
-
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { User, UserRole } from '@/types/auth.types';
@@ -72,21 +71,13 @@ export const authService = {
         // or user does not exist. We need to differentiate.
         console.log("Check login failed:", checkError?.message);
         if (checkError?.message?.includes("Invalid login credentials")) {
-          // Check specifically if the user exists but password is wrong
-          const { data: userCheck } = await supabase.auth.admin.getUserByEmail(email);
-          if (userCheck?.user) {
-            console.error("User exists but password is incorrect");
-            toast({
-              title: "Account already exists",
-              description: "An account with this email already exists. Please try logging in with the correct password or use the password reset option.",
-              variant: "destructive",
-            });
-            throw new Error("Account exists with different password");
-          }
+          // Check if user exists but with wrong password - we can't use admin API from the client
+          // So we'll treat this as a new user case and let the signup API handle existing users
+          console.log("Login failed but could be wrong password or non-existent user");
         }
       }
 
-      console.log("User doesn't exist or password is correct, creating new account");
+      console.log("Creating new account");
       
       // User doesn't exist or login credentials matched, create new account
       const { data, error } = await supabase.auth.signUp({
