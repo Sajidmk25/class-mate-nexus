@@ -23,6 +23,20 @@ export default {
         playfair: ['Playfair Display', 'serif'],
       },
       colors: {
+        'light-blue': '#E6F2FF',
+        'soft-green': '#F0F7EE',
+        'off-white': '#F8F9FA',
+        'light-gray': '#F1F3F5',
+        
+        'deep-blue': '#2C5282',
+        'emerald': '#199473',
+        'amber': '#D97706',
+        'soft-red': '#E53E3E',
+        
+        'dark-gray': '#2D3748',
+        'mid-gray': '#718096',
+        'link-blue': '#3182CE',
+        
         'brand-white': '#FFFFFF',
         'brand-black': '#000000E6',
         'brand-red': {
@@ -30,6 +44,7 @@ export default {
           dark: '#C62828',
           light: '#FF5252'
         },
+        
         border: 'hsl(var(--border))',
         input: 'hsl(var(--input))',
         ring: 'hsl(var(--ring))',
@@ -121,7 +136,9 @@ export default {
         'float': 'float 6s infinite ease-in-out'
       },
       boxShadow: {
-        'glow': '0 0 20px rgba(139, 92, 246, 0.3)'
+        'glow': '0 0 20px rgba(139, 92, 246, 0.3)',
+        'soft': '0 4px 6px rgba(0, 0, 0, 0.05)',
+        'card': '0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.03)',
       }
     }
   },

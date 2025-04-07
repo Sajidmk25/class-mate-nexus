@@ -7,33 +7,33 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%; /* White background */
-    --foreground: 0 0% 0%; /* Black text */
+    --background: 210 40% 98%; /* Light blue background */
+    --foreground: 222 47% 11%; /* Dark gray text */
 
-    --card: 0 0% 100%;
-    --card-foreground: 0 0% 0%;
+    --card: 0 0% 98%;
+    --card-foreground: 222 47% 11%;
 
-    --popover: 0 0% 100%;
-    --popover-foreground: 0 0% 0%;
+    --popover: 0 0% 98%;
+    --popover-foreground: 222 47% 11%;
 
-    --primary: 348 79% 58%; /* Brand Red */
-    --primary-foreground: 0 0% 100%;
+    --primary: 215 70% 35%; /* Deep blue */
+    --primary-foreground: 210 40% 98%;
 
-    --secondary: 0 0% 0%; /* Black */
-    --secondary-foreground: 0 0% 100%;
+    --secondary: 155 65% 35%; /* Emerald */
+    --secondary-foreground: 210 40% 98%;
 
-    --muted: 0 0% 96.1%;
-    --muted-foreground: 0 0% 45.1%;
+    --muted: 220 14% 96%;
+    --muted-foreground: 220 9% 46%;
 
-    --accent: 348 79% 58%; /* Brand Red */
-    --accent-foreground: 0 0% 100%;
+    --accent: 24 90% 40%; /* Amber */
+    --accent-foreground: 210 40% 98%;
 
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 0 0% 98%;
+    --destructive: 0 72% 51%; /* Soft red */
+    --destructive-foreground: 210 40% 98%;
 
-    --border: 0 0% 89.8%;
-    --input: 0 0% 89.8%;
-    --ring: 348 79% 58%; /* Brand Red */
+    --border: 220 13% 91%;
+    --input: 220 13% 91%;
+    --ring: 215 70% 35%; /* Deep blue */
   }
 }
 
@@ -43,40 +43,63 @@
   }
 
   body {
-    @apply bg-background text-foreground font-inter;
-    background: radial-gradient(circle at top right, rgba(234, 56, 76, 0.1), transparent 80%), 
-                linear-gradient(to bottom, #FFFFFF, #F5F5F5);
+    @apply bg-off-white text-dark-gray font-inter;
+    background: linear-gradient(135deg, rgba(230, 242, 255, 0.5), rgba(240, 247, 238, 0.5));
     min-height: 100vh;
   }
 
   h1, h2, h3, h4 {
     font-family: 'Playfair Display', serif;
-    @apply font-bold text-black;
+    @apply font-bold text-dark-gray;
+  }
+
+  a {
+    @apply text-link-blue hover:underline;
   }
 
   .text-gradient {
-    @apply bg-gradient-to-r from-brand-red via-brand-red/80 to-brand-red/60 bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-deep-blue via-deep-blue/80 to-deep-blue/60 bg-clip-text text-transparent;
   }
   
   .text-gradient-header {
-    @apply bg-gradient-to-r from-brand-red/80 via-brand-red to-brand-red/90 bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-deep-blue/90 via-deep-blue to-deep-blue/80 bg-clip-text text-transparent;
   }
 }
 
 @layer components {
   .feature-card {
-    @apply p-6 rounded-lg border border-gray-200 bg-white shadow-sm transition-all duration-300 hover:shadow-lg hover:border-brand-red/50;
+    @apply p-6 rounded-lg border border-border bg-white shadow-soft transition-all duration-300 hover:shadow-card hover:border-deep-blue/20;
   }
 
   .btn-primary {
-    @apply bg-brand-red text-white px-4 py-2 rounded-md hover:bg-brand-red/90 transition-colors;
+    @apply bg-deep-blue text-white px-4 py-2 rounded-md hover:bg-deep-blue/90 transition-colors;
   }
 
   .btn-secondary {
-    @apply bg-black text-white hover:bg-black/80 px-4 py-2 rounded-md transition-colors;
+    @apply bg-emerald text-white hover:bg-emerald/90 px-4 py-2 rounded-md transition-colors;
   }
   
   .card-hover {
-    @apply transition-all duration-300 hover:shadow-lg hover:shadow-brand-red/20 hover:border-brand-red/40;
+    @apply transition-all duration-300 hover:shadow-card hover:border-deep-blue/30;
+  }
+
+  .glass-card {
+    @apply bg-white/70 backdrop-blur-sm border border-white/30 shadow-soft;
+  }
+  
+  .alert-warning {
+    @apply bg-amber/10 text-amber border-l-4 border-amber p-4 rounded;
+  }
+  
+  .alert-success {
+    @apply bg-emerald/10 text-emerald border-l-4 border-emerald p-4 rounded;
+  }
+  
+  .alert-error {
+    @apply bg-soft-red/10 text-soft-red border-l-4 border-soft-red p-4 rounded;
+  }
+  
+  .input-field {
+    @apply bg-white border border-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-deep-blue/30 focus:border-deep-blue/50;
   }
 }
