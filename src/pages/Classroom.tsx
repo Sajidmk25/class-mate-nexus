@@ -169,7 +169,7 @@ const Classroom = () => {
                 <div className="mt-4 grid grid-cols-2 md:grid-cols-4 gap-4">
                   <div className="bg-white/5 p-3 rounded-lg text-center">
                     <h3 className="text-sm font-medium text-primary">Duration</h3>
-                    <p className="text-lg">60 min</p>
+                    <p className="text-lg">Unlimited</p>
                   </div>
                   <div className="bg-white/5 p-3 rounded-lg text-center">
                     <h3 className="text-sm font-medium text-primary">Materials</h3>
