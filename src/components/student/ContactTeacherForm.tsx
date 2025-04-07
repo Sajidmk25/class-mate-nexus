@@ -1,7 +1,7 @@
 
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
+import { useApi } from "@/hooks/useApi";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
@@ -21,6 +21,7 @@ type ContactFormValues = z.infer<typeof contactFormSchema>;
 
 const ContactTeacherForm = () => {
   const { user } = useAuth();
+  const { callApi } = useApi();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const form = useForm<ContactFormValues>({
@@ -44,13 +45,16 @@ const ContactTeacherForm = () => {
     setIsSubmitting(true);
 
     try {
-      const { error } = await supabase.from("student_contacts").insert({
-        student_id: user.id,
-        subject: data.subject,
-        message: data.message
+      // Use callApi instead of direct Supabase call
+      const { error } = await callApi('/contacts', {
+        method: 'POST',
+        body: {
+          subject: data.subject,
+          message: data.message
+        }
       });
 
-      if (error) throw error;
+      if (error) throw new Error(error);
 
       toast({
         title: "Message sent",

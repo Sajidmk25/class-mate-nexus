@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
+import { useApi } from "@/hooks/useApi";
 import Layout from "@/components/Layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -9,7 +9,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
 import { toast } from "@/hooks/use-toast";
 import { Mail, Clock, CheckCircle, AlertTriangle, User, CalendarClock } from "lucide-react";
 import ContactTeacherForm from "@/components/student/ContactTeacherForm";
@@ -31,6 +30,7 @@ interface Contact {
 
 const Contacts = () => {
   const { user, isTeacher } = useAuth();
+  const { callApi } = useApi();
   const [contacts, setContacts] = useState<Contact[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
@@ -43,22 +43,10 @@ const Contacts = () => {
     setLoading(true);
 
     try {
-      let query = supabase.from("student_contacts").select(`
-        *,
-        profile:student_id(full_name, student_id)
-      `);
+      // Use the API endpoint instead of direct Supabase calls
+      const { data, error } = await callApi('/contacts', { method: 'GET' });
 
-      if (isTeacher) {
-        // Teachers can see all contacts
-        query = query.order('created_at', { ascending: false });
-      } else {
-        // Students can only see their own contacts
-        query = query.eq('student_id', user?.id).order('created_at', { ascending: false });
-      }
-
-      const { data, error } = await query;
-
-      if (error) throw error;
+      if (error) throw new Error(error);
 
       setContacts(data || []);
     } catch (error) {
@@ -93,15 +81,15 @@ const Contacts = () => {
 
   const updateContactStatus = async (contactId: string, newStatus: string) => {
     try {
-      const { error } = await supabase
-        .from("student_contacts")
-        .update({ 
-          status: newStatus,
-          updated_at: new Date().toISOString()
-        })
-        .eq("id", contactId);
+      const { error } = await callApi('/contacts', {
+        method: 'PUT',
+        body: { 
+          id: contactId,
+          status: newStatus
+        }
+      });
 
-      if (error) throw error;
+      if (error) throw new Error(error);
 
       setContacts(contacts.map(contact => 
         contact.id === contactId ? { ...contact, status: newStatus } : contact
@@ -129,16 +117,16 @@ const Contacts = () => {
     if (!selectedContact) return;
 
     try {
-      const { error } = await supabase
-        .from("student_contacts")
-        .update({ 
-          notes: notes,
+      const { error } = await callApi('/contacts', {
+        method: 'PUT',
+        body: { 
+          id: selectedContact.id,
           status: status,
-          updated_at: new Date().toISOString()
-        })
-        .eq("id", selectedContact.id);
+          notes: notes
+        }
+      });
 
-      if (error) throw error;
+      if (error) throw new Error(error);
 
       setContacts(contacts.map(contact => 
         contact.id === selectedContact.id ? { ...contact, notes, status } : contact
