@@ -1,34 +1,9 @@
 
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { createContext, useContext, useState, ReactNode } from 'react';
 import { toast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-import { Session, User as SupabaseUser } from '@supabase/supabase-js';
-
-export type UserRole = 'student' | 'teacher';
-
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  photoURL: string;
-  role: UserRole;
-  phone?: string;
-  bio?: string;
-}
-
-interface AuthContextType {
-  user: User | null;
-  supabaseUser: SupabaseUser | null;
-  session: Session | null;
-  login: (email: string, password: string) => Promise<void>;
-  signup: (email: string, password: string, name: string, role: UserRole) => Promise<void>;
-  loginWithGoogle: (role?: UserRole) => Promise<void>;
-  logout: () => Promise<void>;
-  updateProfile: (data: Partial<User>) => Promise<void>;
-  isAuthenticated: boolean;
-  isLoading: boolean;
-  isTeacher: boolean;
-}
+import { authService } from '@/services/auth.service';
+import { AuthContextType, User, UserRole } from '@/types/auth.types';
+import { useAuthState } from '@/hooks/useAuthState';
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
@@ -45,100 +20,12 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider = ({ children }: AuthProviderProps) => {
-  const [user, setUser] = useState<User | null>(null);
-  const [supabaseUser, setSupabaseUser] = useState<SupabaseUser | null>(null);
-  const [session, setSession] = useState<Session | null>(null);
-  const [isLoading, setIsLoading] = useState(true);
-
-  // Initialize auth state from Supabase
-  useEffect(() => {
-    // Set up Supabase auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, currentSession) => {
-        console.log("Auth state changed:", event, currentSession?.user?.id);
-        setSession(currentSession);
-        setSupabaseUser(currentSession?.user ?? null);
-        
-        // Convert Supabase user to our User format if session exists
-        if (currentSession?.user) {
-          const supaUser = currentSession.user;
-          const userRole = supaUser.user_metadata.role as UserRole || 'student';
-          
-          const userObj: User = {
-            id: supaUser.id,
-            name: supaUser.user_metadata.name || supaUser.email?.split('@')[0] || 'User',
-            email: supaUser.email || '',
-            photoURL: supaUser.user_metadata.avatar_url || `https://i.pravatar.cc/150?img=${Math.floor(Math.random() * 70)}`,
-            role: userRole,
-            phone: supaUser.phone || '',
-            bio: supaUser.user_metadata.bio || ''
-          };
-          
-          setUser(userObj);
-        } else {
-          setUser(null);
-        }
-      }
-    );
-
-    // Check for existing session
-    const initializeSession = async () => {
-      try {
-        const { data: { session: initialSession } } = await supabase.auth.getSession();
-        
-        console.log("Initial session check:", initialSession?.user?.id);
-        
-        if (initialSession?.user) {
-          setSession(initialSession);
-          setSupabaseUser(initialSession.user);
-          
-          const userRole = initialSession.user.user_metadata.role as UserRole || 'student';
-          
-          const userObj: User = {
-            id: initialSession.user.id,
-            name: initialSession.user.user_metadata.name || initialSession.user.email?.split('@')[0] || 'User',
-            email: initialSession.user.email || '',
-            photoURL: initialSession.user.user_metadata.avatar_url || `https://i.pravatar.cc/150?img=${Math.floor(Math.random() * 70)}`,
-            role: userRole,
-            phone: initialSession.user.phone || '',
-            bio: initialSession.user.user_metadata.bio || ''
-          };
-          
-          setUser(userObj);
-        }
-      } catch (error) {
-        console.error("Error getting session:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-    
-    initializeSession();
-
-    // Cleanup
-    return () => {
-      subscription?.unsubscribe();
-    };
-  }, []);
+  const { user, supabaseUser, session, isLoading } = useAuthState();
+  const [updatingProfile, setUpdatingProfile] = useState(false);
 
   const login = async (email: string, password: string) => {
     try {
-      setIsLoading(true);
-      
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password
-      });
-      
-      if (error) {
-        throw error;
-      }
-      
-      toast({
-        title: "Logged in successfully",
-        description: `Welcome back!`,
-      });
-      
+      await authService.login(email, password);
     } catch (error: any) {
       console.error("Login error:", error);
       toast({
@@ -147,39 +34,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         variant: "destructive",
       });
       throw error;
-    } finally {
-      setIsLoading(false);
     }
   };
 
   const signup = async (email: string, password: string, name: string, role: UserRole) => {
     try {
-      setIsLoading(true);
-      
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          data: {
-            name,
-            role,
-            avatar_url: `https://i.pravatar.cc/150?img=${Math.floor(Math.random() * 70)}`,
-            bio: role === 'teacher' 
-              ? "Experienced educator with a passion for interactive learning." 
-              : "Student with a passion for learning and collaboration."
-          }
-        }
-      });
-      
-      if (error) {
-        throw error;
-      }
-      
-      toast({
-        title: "Account created successfully",
-        description: `Welcome to EduConnect, ${name}!`,
-      });
-      
+      await authService.signup(email, password, name, role);
     } catch (error: any) {
       console.error("Signup error:", error);
       toast({
@@ -188,39 +48,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         variant: "destructive",
       });
       throw error;
-    } finally {
-      setIsLoading(false);
     }
   };
 
   const loginWithGoogle = async (role?: UserRole) => {
     try {
-      setIsLoading(true);
-      
-      // Get the current domain, adjusting for localhost
-      const domain = window.location.hostname === 'localhost' 
-        ? `${window.location.protocol}//${window.location.host}`
-        : window.location.origin;
-      
-      // Create redirect URL that will handle the return from Google auth
-      const redirectTo = `${domain}/dashboard`;
-      console.log("Redirect URL:", redirectTo);
-      
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          queryParams: {
-            access_type: 'offline',
-            prompt: 'consent',
-          },
-          redirectTo
-        }
-      });
-      
-      if (error) {
-        throw error;
-      }
-      
+      await authService.loginWithGoogle(role);
     } catch (error: any) {
       console.error("Google login error:", error);
       toast({
@@ -229,8 +62,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         variant: "destructive",
       });
       throw error;
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -238,29 +69,12 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     if (!user || !supabaseUser) return;
     
     try {
-      setIsLoading(true);
+      setUpdatingProfile(true);
       
-      const { error } = await supabase.auth.updateUser({
-        data: {
-          name: data.name || user.name,
-          role: data.role || user.role,
-          bio: data.bio || user.bio,
-          phone: data.phone || user.phone,
-        }
-      });
-      
-      if (error) {
-        throw error;
-      }
+      await authService.updateProfile(user.id, data);
       
       // Update local user state
       const updatedUser = { ...user, ...data };
-      setUser(updatedUser);
-      
-      toast({
-        title: "Profile updated",
-        description: "Your profile information has been saved successfully.",
-      });
       
     } catch (error: any) {
       console.error("Profile update error:", error);
@@ -270,27 +84,13 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
         variant: "destructive",
       });
     } finally {
-      setIsLoading(false);
+      setUpdatingProfile(false);
     }
   };
 
   const logout = async () => {
     try {
-      const { error } = await supabase.auth.signOut();
-      
-      if (error) {
-        throw error;
-      }
-      
-      setUser(null);
-      setSupabaseUser(null);
-      setSession(null);
-      
-      toast({
-        title: "Logged out",
-        description: "You have been successfully logged out.",
-      });
-      
+      await authService.logout();
     } catch (error: any) {
       console.error("Logout error:", error);
       toast({
@@ -311,7 +111,7 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     logout,
     updateProfile,
     isAuthenticated: !!session,
-    isLoading,
+    isLoading: isLoading || updatingProfile,
     isTeacher: user?.role === 'teacher',
   };
 
