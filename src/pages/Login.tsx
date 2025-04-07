@@ -31,6 +31,7 @@ const Login = () => {
   const [signupConfirmPassword, setSignupConfirmPassword] = useState("");
   const [name, setName] = useState("");
   const [role, setRole] = useState<UserRole>("student");
+  const [studentId, setStudentId] = useState("");
   
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [resetEmail, setResetEmail] = useState("");
@@ -96,10 +97,22 @@ const Login = () => {
       return;
     }
     
+    // Validate student ID if role is student
+    if (role === "student" && !studentId) {
+      setErrorMessage("Student ID is required for student accounts");
+      return;
+    }
+    
     setIsLoading(true);
     try {
       console.log("Starting signup process");
-      await signup(signupEmail, signupPassword, name, role);
+      
+      // Include studentId in the signup metadata if role is student
+      const metadata = role === "student" 
+        ? { name, role, studentId } 
+        : { name, role };
+        
+      await signup(signupEmail, signupPassword, name, role, metadata);
       console.log("Signup completed successfully");
       // Navigation is handled by the auth effect above
     } catch (error: any) {
@@ -234,6 +247,8 @@ const Login = () => {
                   setRole={setRole}
                   isLoading={isLoading}
                   onSubmit={handleSignup}
+                  studentId={studentId}
+                  setStudentId={setStudentId}
                 />
               </CardContent>
               <CardFooter className="flex-col gap-4">

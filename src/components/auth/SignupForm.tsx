@@ -1,10 +1,12 @@
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Loader2 } from "lucide-react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { UserRole } from "@/types/auth.types";
+import { StudentIdField } from "./StudentIdField";
 
 interface SignupFormProps {
   name: string;
@@ -19,6 +21,8 @@ interface SignupFormProps {
   setRole: (role: UserRole) => void;
   isLoading: boolean;
   onSubmit: (e: React.FormEvent) => void;
+  studentId?: string;
+  setStudentId?: (id: string) => void;
 }
 
 export const SignupForm = ({
@@ -33,7 +37,9 @@ export const SignupForm = ({
   role,
   setRole,
   isLoading,
-  onSubmit
+  onSubmit,
+  studentId = "",
+  setStudentId = () => {}
 }: SignupFormProps) => {
   return (
     <form onSubmit={onSubmit} className="space-y-4">
@@ -41,7 +47,7 @@ export const SignupForm = ({
         <Label htmlFor="name">Full Name</Label>
         <Input 
           id="name"
-          placeholder="John Doe"
+          placeholder="Enter your name"
           value={name}
           onChange={(e) => setName(e.target.value)}
           required
@@ -50,9 +56,9 @@ export const SignupForm = ({
         />
       </div>
       <div className="space-y-2">
-        <Label htmlFor="signup-email">Email</Label>
+        <Label htmlFor="email">Email</Label>
         <Input 
-          id="signup-email"
+          id="email"
           type="email"
           placeholder="you@example.com"
           value={email}
@@ -62,10 +68,34 @@ export const SignupForm = ({
           className="bg-white border-white/20"
         />
       </div>
+      
       <div className="space-y-2">
-        <Label htmlFor="signup-password">Password</Label>
+        <Label>Account Type</Label>
+        <RadioGroup value={role} onValueChange={(value) => setRole(value as UserRole)} className="flex space-x-4">
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="student" id="student" />
+            <Label htmlFor="student" className="cursor-pointer">Student</Label>
+          </div>
+          <div className="flex items-center space-x-2">
+            <RadioGroupItem value="teacher" id="teacher" />
+            <Label htmlFor="teacher" className="cursor-pointer">Teacher</Label>
+          </div>
+        </RadioGroup>
+      </div>
+      
+      {/* Show student ID field only for student role */}
+      {role === "student" && setStudentId && (
+        <StudentIdField 
+          studentId={studentId} 
+          setStudentId={setStudentId}
+          isDisabled={isLoading}
+        />
+      )}
+      
+      <div className="space-y-2">
+        <Label htmlFor="password">Password</Label>
         <Input 
-          id="signup-password"
+          id="password"
           type="password"
           placeholder="••••••••"
           value={password}
@@ -74,12 +104,11 @@ export const SignupForm = ({
           disabled={isLoading}
           className="bg-white border-white/20"
         />
-        <p className="text-xs text-gray-500">Must be at least 6 characters</p>
       </div>
       <div className="space-y-2">
-        <Label htmlFor="confirm-password">Confirm Password</Label>
+        <Label htmlFor="confirmPassword">Confirm Password</Label>
         <Input 
-          id="confirm-password"
+          id="confirmPassword"
           type="password"
           placeholder="••••••••"
           value={confirmPassword}
@@ -88,33 +117,6 @@ export const SignupForm = ({
           disabled={isLoading}
           className="bg-white border-white/20"
         />
-      </div>
-      <div className="space-y-2">
-        <Label>I am a...</Label>
-        <RadioGroup 
-          value={role} 
-          onValueChange={(value) => setRole(value as UserRole)} 
-          className="grid grid-cols-2 gap-4 pt-2"
-        >
-          <div>
-            <RadioGroupItem value="student" id="student" className="peer sr-only" />
-            <Label
-              htmlFor="student"
-              className="flex flex-col items-center justify-between rounded-md border-2 border-white/20 bg-white p-4 hover:bg-white/5 hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-            >
-              <span>Student</span>
-            </Label>
-          </div>
-          <div>
-            <RadioGroupItem value="teacher" id="teacher" className="peer sr-only" />
-            <Label
-              htmlFor="teacher"
-              className="flex flex-col items-center justify-between rounded-md border-2 border-white/20 bg-white p-4 hover:bg-white/5 hover:text-accent-foreground peer-data-[state=checked]:border-primary [&:has([data-state=checked])]:border-primary"
-            >
-              <span>Teacher</span>
-            </Label>
-          </div>
-        </RadioGroup>
       </div>
       <Button type="submit" className="w-full" disabled={isLoading}>
         {isLoading ? (

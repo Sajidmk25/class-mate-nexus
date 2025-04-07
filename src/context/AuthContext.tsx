@@ -37,9 +37,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   };
 
-  const signup = async (email: string, password: string, name: string, role: UserRole) => {
+  const signup = async (
+    email: string, 
+    password: string, 
+    name: string, 
+    role: UserRole,
+    metadata?: Record<string, any>
+  ) => {
     try {
-      await authService.signup(email, password, name, role);
+      await authService.signup(email, password, name, role, metadata);
     } catch (error: any) {
       console.error("Signup error:", error);
       toast({

@@ -13,7 +13,8 @@ export const mapSupabaseUserToUser = (supaUser: SupabaseUser): User => {
     photoURL: supaUser.user_metadata.avatar_url || `https://i.pravatar.cc/150?img=${Math.floor(Math.random() * 70)}`,
     role: userRole,
     phone: supaUser.phone || '',
-    bio: supaUser.user_metadata.bio || ''
+    bio: supaUser.user_metadata.bio || '',
+    studentId: supaUser.user_metadata.studentId || ''
   };
 };
 
@@ -45,7 +46,7 @@ export const authService = {
     }
   },
   
-  async signup(email: string, password: string, name: string, role: UserRole) {
+  async signup(email: string, password: string, name: string, role: UserRole, metadata?: Record<string, any>) {
     try {
       console.log("Signing up user:", email, name, role);
       
@@ -79,19 +80,25 @@ export const authService = {
 
       console.log("Creating new account");
       
+      // Default metadata if not provided
+      const defaultMetadata = {
+        name,
+        role,
+        avatar_url: `https://i.pravatar.cc/150?img=${Math.floor(Math.random() * 70)}`,
+        bio: role === 'teacher' 
+          ? "Experienced educator with a passion for interactive learning." 
+          : "Student with a passion for learning and collaboration."
+      };
+      
+      // Merge provided metadata with defaults
+      const userMetadata = { ...defaultMetadata, ...(metadata || {}) };
+      
       // User doesn't exist or login credentials matched, create new account
       const { data, error } = await supabase.auth.signUp({
         email,
         password,
         options: {
-          data: {
-            name,
-            role,
-            avatar_url: `https://i.pravatar.cc/150?img=${Math.floor(Math.random() * 70)}`,
-            bio: role === 'teacher' 
-              ? "Experienced educator with a passion for interactive learning." 
-              : "Student with a passion for learning and collaboration."
-          },
+          data: userMetadata,
           // For development, we're bypassing email confirmation
           emailRedirectTo: `${window.location.origin}/dashboard`,
         }
