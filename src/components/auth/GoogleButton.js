@@ -3,17 +3,11 @@ import { Button } from "@/components/ui/button";
 import { Loader2 } from "lucide-react";
 import { FcGoogle } from "react-icons/fc";
 
-interface GoogleButtonProps {
-  onClick: () => void;
-  isLoading: boolean;
-  isSignup?: boolean;
-}
-
 export const GoogleButton = ({ 
   onClick, 
   isLoading,
   isSignup = false 
-}: GoogleButtonProps) => {
+}) => {
   return (
     <Button 
       variant="outline"

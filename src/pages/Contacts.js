@@ -7,14 +7,13 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { toast } from "@/hooks/use-toast";
 import ContactsList from "@/components/contacts/ContactsList";
 import ContactDetailDialog from "@/components/contacts/ContactDetailDialog";
-import { Contact } from "@/components/contacts/ContactDetailDialog";
 
 const Contacts = () => {
   const { user, isTeacher } = useAuth();
   const { callApi } = useApi();
-  const [contacts, setContacts] = useState<Contact[]>([]);
+  const [contacts, setContacts] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedContact, setSelectedContact] = useState<Contact | null>(null);
+  const [selectedContact, setSelectedContact] = useState(null);
   const [openDialog, setOpenDialog] = useState(false);
 
   const fetchContacts = async () => {
@@ -44,7 +43,7 @@ const Contacts = () => {
     }
   }, [user]);
 
-  const handleOpenContact = (contact: Contact) => {
+  const handleOpenContact = (contact) => {
     setSelectedContact(contact);
     setOpenDialog(true);
     
@@ -54,7 +53,7 @@ const Contacts = () => {
     }
   };
 
-  const updateContactStatus = async (contactId: string, newStatus: string) => {
+  const updateContactStatus = async (contactId, newStatus) => {
     try {
       const { error } = await callApi('/contacts', {
         method: 'PUT',

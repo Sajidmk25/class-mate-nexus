@@ -20,12 +20,7 @@ const Grades = () => {
   const [courseName, setCourseName] = useState("");
   const [assignmentName, setAssignmentName] = useState("");
   const [grade, setGrade] = useState("");
-  const [addedGrades, setAddedGrades] = useState<{
-    studentId: string;
-    courseName: string;
-    assignmentName: string;
-    grade: string;
-  }[]>([]);
+  const [addedGrades, setAddedGrades] = useState([]);
   
   const { toast } = useToast();
   

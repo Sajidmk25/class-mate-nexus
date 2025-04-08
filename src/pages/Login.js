@@ -1,75 +1,126 @@
 
-import React, { useState } from 'react';
-import { useAuth } from '@/context/AuthContext.js';
-import { useNavigate } from 'react-router-dom';
+import { useEffect, useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
+import { useAuth } from "@/context/AuthContext";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useLoginLogic } from "@/hooks/useLoginLogic";
+import { LoginTab } from "@/components/auth/LoginTab";
+import { SignupTab } from "@/components/auth/SignupTab";
 
 const Login = () => {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const { login } = useAuth();
   const navigate = useNavigate();
-
-  const handleLogin = async (e) => {
-    e.preventDefault();
-    setIsLoading(true);
-    setError(null);
+  const location = useLocation();
+  const { isAuthenticated } = useAuth();
+  const [activeTab, setActiveTab] = useState("login");
+  
+  const {
+    // Auth state
+    isLoading,
+    errorMessage,
+    setErrorMessage,
     
-    try {
-      await login(email, password);
-      navigate('/dashboard');
-    } catch (err) {
-      setError(err.message || 'Failed to login');
-    } finally {
-      setIsLoading(false);
+    // Login state & handlers
+    email,
+    setEmail,
+    password,
+    setPassword,
+    handleLogin,
+    
+    // Signup state & handlers
+    signupEmail,
+    setSignupEmail,
+    signupPassword,
+    setSignupPassword,
+    signupConfirmPassword,
+    setSignupConfirmPassword,
+    name,
+    setName,
+    role,
+    setRole,
+    studentId,
+    setStudentId,
+    handleSignup,
+    
+    // Reset password state & handlers
+    resetEmail,
+    setResetEmail,
+    showResetForm,
+    setShowResetForm,
+    handleResetPassword,
+  } = useLoginLogic();
+  
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get("signup") === "true") {
+      setActiveTab("signup");
     }
-  };
+  }, [location]);
+  
+  useEffect(() => {
+    if (isAuthenticated) {
+      navigate("/dashboard");
+    }
+  }, [isAuthenticated, navigate]);
 
+  useEffect(() => {
+    setErrorMessage(null);
+  }, [activeTab, setErrorMessage]);
+  
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="max-w-md w-full bg-white rounded-lg shadow-md p-8">
-        <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
+    <div className="flex min-h-screen items-center justify-center bg-gradient-to-b from-background to-background/90 px-4">
+      <div className="w-full max-w-md">
+        <div className="mb-8 text-center">
+          <h1 className="text-3xl font-bold text-gradient">Virtual Classroom</h1>
+          <p className="mt-2 text-gray-400">Join our modern education platform</p>
+        </div>
         
-        {error && (
-          <div className="bg-red-100 border-l-4 border-red-500 text-red-700 p-4 mb-4" role="alert">
-            <p>{error}</p>
-          </div>
-        )}
-        
-        <form onSubmit={handleLogin} className="space-y-6">
-          <div>
-            <label htmlFor="email" className="block text-gray-700 mb-1">Email</label>
-            <input
-              type="email"
-              id="email"
-              value={email}
-              onChange={e => setEmail(e.target.value)}
-              className="w-full px-3 py-2 border rounded-md"
-              required
-            />
-          </div>
+        <Tabs 
+          value={activeTab} 
+          onValueChange={(value) => setActiveTab(value)} 
+          className="w-full"
+        >
+          <TabsList className="grid w-full grid-cols-2 mb-6">
+            <TabsTrigger value="login">Login</TabsTrigger>
+            <TabsTrigger value="signup">Sign Up</TabsTrigger>
+          </TabsList>
           
-          <div>
-            <label htmlFor="password" className="block text-gray-700 mb-1">Password</label>
-            <input
-              type="password"
-              id="password"
-              value={password}
-              onChange={e => setPassword(e.target.value)}
-              className="w-full px-3 py-2 border rounded-md"
-              required
+          <TabsContent value="login">
+            <LoginTab
+              email={email}
+              setEmail={setEmail}
+              password={password}
+              setPassword={setPassword}
+              resetEmail={resetEmail}
+              setResetEmail={setResetEmail}
+              isLoading={isLoading}
+              showResetForm={showResetForm}
+              setShowResetForm={setShowResetForm}
+              errorMessage={errorMessage}
+              handleLogin={handleLogin}
+              handleResetPassword={handleResetPassword}
             />
-          </div>
+          </TabsContent>
           
-          <button 
-            type="submit" 
-            className="w-full bg-blue-500 text-white py-2 rounded-md hover:bg-blue-600"
-            disabled={isLoading}
-          >
-            {isLoading ? 'Logging in...' : 'Login'}
-          </button>
-        </form>
+          <TabsContent value="signup">
+            <SignupTab
+              name={name}
+              setName={setName}
+              email={signupEmail}
+              setEmail={setSignupEmail}
+              password={signupPassword}
+              setPassword={setSignupPassword}
+              confirmPassword={signupConfirmPassword}
+              setConfirmPassword={setSignupConfirmPassword}
+              role={role}
+              setRole={setRole}
+              isLoading={isLoading}
+              errorMessage={errorMessage}
+              onSubmit={handleSignup}
+              studentId={studentId}
+              setStudentId={setStudentId}
+            />
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );

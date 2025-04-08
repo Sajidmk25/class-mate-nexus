@@ -1,7 +1,7 @@
 
-import Header from "@/components/Header.js";
-import HeroSection from "@/components/HeroSection.js";
-import Footer from "@/components/Footer.js";
+import Header from "@/components/Header";
+import HeroSection from "@/components/HeroSection";
+import Footer from "@/components/Footer";
 
 const Index = () => {
   return (

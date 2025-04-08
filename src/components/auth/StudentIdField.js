@@ -2,19 +2,12 @@
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-interface StudentIdFieldProps {
-  studentId: string;
-  setStudentId: (id: string) => void;
-  isDisabled?: boolean;
-  isRequired?: boolean;
-}
-
 export const StudentIdField = ({
   studentId,
   setStudentId,
   isDisabled = false,
   isRequired = true
-}: StudentIdFieldProps) => {
+}) => {
   return (
     <div className="space-y-2">
       <Label htmlFor="studentId">Student ID</Label>
