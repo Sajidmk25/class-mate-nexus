@@ -4,7 +4,7 @@ import HeroSection from "@/components/HeroSection";
 import Footer from "@/components/Footer";
 import FeatureSection from "@/components/FeatureSection";
 import TestimonialSection from "@/components/TestimonialSection";
-import DashboardGrid from "@/components/DashboardGrid";
+import DashboardGrid from "@/components/DashboardGrid.jsx";
 
 const Index = () => {
   return (
