@@ -1,6 +1,7 @@
+
 import { Link } from "react-router-dom";
 import { useState, useEffect } from "react";
-import { useAuth } from "../context/AuthContext.jsx";
+import { useAuth } from "../context/AuthContext";
 
 const Header = () => {
   const { isAuthenticated, logout } = useAuth();

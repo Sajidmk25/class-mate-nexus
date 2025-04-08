@@ -1,6 +1,7 @@
+
 import { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import { useAuth } from "../context/AuthContext.jsx";
+import { useAuth } from "../context/AuthContext";
 
 // Simple Login Form Component
 function LoginForm({ email, setEmail, password, setPassword, isLoading, onSubmit, onForgotPassword }) {
