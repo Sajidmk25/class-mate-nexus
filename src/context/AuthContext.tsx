@@ -1,3 +1,4 @@
+
 import { createContext, useContext, useState, ReactNode } from 'react';
 import { toast } from '@/hooks/use-toast';
 import { authService } from '@/services/auth.service';
@@ -56,20 +57,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   };
 
-  const loginWithGoogle = async (role?: UserRole) => {
-    try {
-      await authService.loginWithGoogle(role);
-    } catch (error: any) {
-      console.error("Google login error:", error);
-      toast({
-        title: "Google login failed",
-        description: error.message || "Please try again or use another method.",
-        variant: "destructive",
-      });
-      throw error;
-    }
-  };
-
   const updateProfile = async (data: Partial<User>) => {
     if (!user || !supabaseUser) return;
     
@@ -77,10 +64,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
       setUpdatingProfile(true);
       
       await authService.updateProfile(user.id, data);
-      
-      // Update local user state
-      const updatedUser = { ...user, ...data };
-      
     } catch (error: any) {
       console.error("Profile update error:", error);
       toast({
@@ -112,7 +95,6 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     session,
     login,
     signup,
-    loginWithGoogle,
     logout,
     updateProfile,
     isAuthenticated: !!session,
@@ -122,3 +104,4 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
+

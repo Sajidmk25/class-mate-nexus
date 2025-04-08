@@ -1,3 +1,4 @@
+
 import { toast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { User, UserRole } from '@/types/auth.types';
@@ -50,36 +51,6 @@ export const authService = {
     try {
       console.log("Signing up user:", email, name, role);
       
-      // First check if user already exists by trying to login
-      try {
-        console.log("Checking if user exists by attempting login");
-        const { data: existingUserData } = await supabase.auth.signInWithPassword({
-          email,
-          password
-        });
-        
-        // If login succeeds, user already exists and credentials are correct
-        if (existingUserData?.user) {
-          console.log("User exists and credentials are correct, proceeding with login");
-          toast({
-            title: "Logged in successfully",
-            description: `Welcome back! You already had an account with us.`,
-          });
-          return existingUserData;
-        }
-      } catch (checkError: any) {
-        // If login fails with invalid credentials, it might mean user exists but password is wrong
-        // or user does not exist. We need to differentiate.
-        console.log("Check login failed:", checkError?.message);
-        if (checkError?.message?.includes("Invalid login credentials")) {
-          // Check if user exists but with wrong password - we can't use admin API from the client
-          // So we'll treat this as a new user case and let the signup API handle existing users
-          console.log("Login failed but could be wrong password or non-existent user");
-        }
-      }
-
-      console.log("Creating new account");
-      
       // Default metadata if not provided
       const defaultMetadata = {
         name,
@@ -99,7 +70,6 @@ export const authService = {
         password,
         options: {
           data: userMetadata,
-          // For development, we're bypassing email confirmation
           emailRedirectTo: `${window.location.origin}/dashboard`,
         }
       });
@@ -110,62 +80,10 @@ export const authService = {
         // Special handling for already registered users
         if (error.message?.includes('already registered')) {
           console.log("User already registered, attempting auto-login");
-          
-          // User exists, try to login with provided credentials
           return await this.login(email, password);
         }
         
         throw error;
-      }
-      
-      // For development purposes, auto-login without email confirmation
-      if (!data.session) {
-        console.log("No session after signup, attempting auto-login");
-        
-        // Wait a brief moment to ensure the user is created in the database
-        await new Promise(resolve => setTimeout(resolve, 1000));
-        
-        try {
-          const { data: loginData, error: loginError } = await supabase.auth.signInWithPassword({
-            email,
-            password
-          });
-          
-          if (loginError) {
-            console.error("Auto-login after signup failed:", loginError);
-            
-            if (loginError.message.includes("Email not confirmed")) {
-              toast({
-                title: "Account created",
-                description: `Welcome to Virtual Classroom, ${name}! For demo purposes, you can login without email confirmation.`,
-              });
-              
-              // Try login one more time without email verification
-              try {
-                await supabase.auth.signInWithPassword({
-                  email,
-                  password
-                });
-              } catch (finalLoginError) {
-                console.error("Final login attempt failed:", finalLoginError);
-              }
-              
-              return data;
-            }
-            
-            throw loginError;
-          }
-          
-          console.log("Auto-login successful:", loginData.user?.id);
-          toast({
-            title: "Account created successfully",
-            description: `Welcome to Virtual Classroom, ${name}!`,
-          });
-          return loginData;
-        } catch (autoLoginError) {
-          console.error("Auto-login attempt failed:", autoLoginError);
-          // Continue with the flow even if auto-login fails
-        }
       }
       
       toast({
@@ -191,48 +109,6 @@ export const authService = {
         });
       }
       
-      throw error;
-    }
-  },
-  
-  async loginWithGoogle(role?: UserRole) {
-    try {
-      // Get window location dynamically to ensure correct redirect
-      const currentUrl = window.location.origin;
-      const redirectTo = `${currentUrl}/dashboard`;
-      
-      console.log("Google login - Redirect URL:", redirectTo);
-      
-      const { data, error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
-        options: {
-          redirectTo,
-          queryParams: {
-            access_type: 'offline',
-            prompt: 'consent',
-          },
-          scopes: 'email profile',
-        }
-      });
-      
-      if (error) {
-        console.error("Google sign in error:", error);
-        toast({
-          title: "Google sign in failed",
-          description: error.message || "There was a problem signing in with Google. Please try again.",
-          variant: "destructive",
-        });
-        throw error;
-      }
-      
-      return data;
-    } catch (error: any) {
-      console.error("Google login error:", error);
-      toast({
-        title: "Google login failed",
-        description: "There was an error connecting to Google. Please try again or use email login.",
-        variant: "destructive",
-      });
       throw error;
     }
   },
@@ -307,82 +183,5 @@ export const authService = {
       throw error;
     }
   },
-  
-  async createUserAccount(email: string, password: string, name: string, role: UserRole, metadata?: Record<string, any>) {
-    try {
-      console.log("Admin creating account for:", email, name, role);
-      
-      const defaultMetadata = {
-        name,
-        role,
-        avatar_url: `https://i.pravatar.cc/150?img=${Math.floor(Math.random() * 70)}`,
-        bio: role === 'teacher' 
-          ? "Experienced educator with a passion for interactive learning." 
-          : "Student with a passion for learning and collaboration."
-      };
-      
-      // Merge provided metadata with defaults
-      const userMetadata = { ...defaultMetadata, ...(metadata || {}) };
-      
-      // Create user through the edge function (which will use service role key)
-      const { data: { user }, error } = await supabase.functions.invoke('/admin/create-user', {
-        body: {
-          email,
-          password,
-          metadata: userMetadata
-        }
-      });
-      
-      if (error) {
-        console.error("Admin create user error:", error);
-        throw error;
-      }
-      
-      toast({
-        title: "Account created successfully",
-        description: `New ${role} account created for ${name}`,
-      });
-      
-      return user;
-    } catch (error: any) {
-      console.error("Admin create user error:", error);
-      toast({
-        title: "Account creation failed",
-        description: error.message || "There was an issue creating the account",
-        variant: "destructive",
-      });
-      throw error;
-    }
-  },
-  
-  async resetUserPassword(userId: string, newPassword: string) {
-    try {
-      const { error } = await supabase.functions.invoke('/admin/reset-password', {
-        body: {
-          userId,
-          newPassword
-        }
-      });
-      
-      if (error) {
-        console.error("Admin reset password error:", error);
-        throw error;
-      }
-      
-      toast({
-        title: "Password reset successful",
-        description: "The user's password has been updated",
-      });
-      
-      return true;
-    } catch (error: any) {
-      console.error("Admin reset password error:", error);
-      toast({
-        title: "Password reset failed",
-        description: error.message || "There was an issue resetting the password",
-        variant: "destructive",
-      });
-      throw error;
-    }
-  }
 };
+

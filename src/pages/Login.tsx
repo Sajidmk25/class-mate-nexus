@@ -13,13 +13,11 @@ import { authService } from "@/services/auth.service";
 import { LoginForm } from "@/components/auth/LoginForm";
 import { SignupForm } from "@/components/auth/SignupForm";
 import { PasswordResetForm } from "@/components/auth/PasswordResetForm";
-import { GoogleButton } from "@/components/auth/GoogleButton";
-import { AuthDivider } from "@/components/auth/AuthDivider";
 
 const Login = () => {
   const navigate = useNavigate();
   const location = useLocation();
-  const { login, signup, loginWithGoogle, isAuthenticated } = useAuth();
+  const { login, signup, isAuthenticated } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [activeTab, setActiveTab] = useState<"login" | "signup">("login");
   
@@ -67,7 +65,6 @@ const Login = () => {
     setIsLoading(true);
     try {
       await login(email, password);
-      // Navigation is handled by the auth effect above
     } catch (error: any) {
       console.error("Login failed:", error);
       setErrorMessage(error.message === "Invalid login credentials" 
@@ -105,16 +102,12 @@ const Login = () => {
     
     setIsLoading(true);
     try {
-      console.log("Starting signup process");
-      
       // Include studentId in the signup metadata if role is student
       const metadata = role === "student" 
         ? { name, role, studentId } 
         : { name, role };
         
       await signup(signupEmail, signupPassword, name, role, metadata);
-      console.log("Signup completed successfully");
-      // Navigation is handled by the auth effect above
     } catch (error: any) {
       console.error("Signup failed:", error);
       if (error.message?.includes('different password')) {
@@ -122,20 +115,6 @@ const Login = () => {
       } else if (!error.message?.includes('already registered')) {
         setErrorMessage(error.message || "Signup failed. Please check your information and try again.");
       }
-    } finally {
-      setIsLoading(false);
-    }
-  };
-  
-  const handleGoogleLogin = async () => {
-    setIsLoading(true);
-    setErrorMessage(null);
-    
-    try {
-      await loginWithGoogle(activeTab === "signup" ? role : undefined);
-    } catch (error: any) {
-      console.error("Google login failed:", error);
-      setErrorMessage(error.message || "Google login failed. Please try again or use another method.");
     } finally {
       setIsLoading(false);
     }
@@ -214,16 +193,6 @@ const Login = () => {
                   />
                 )}
               </CardContent>
-              {!showResetForm && (
-                <CardFooter className="flex-col gap-4">
-                  <AuthDivider />
-                  <GoogleButton 
-                    onClick={handleGoogleLogin}
-                    isLoading={isLoading}
-                    isSignup={false}
-                  />
-                </CardFooter>
-              )}
             </Card>
           </TabsContent>
           
@@ -251,14 +220,6 @@ const Login = () => {
                   setStudentId={setStudentId}
                 />
               </CardContent>
-              <CardFooter className="flex-col gap-4">
-                <AuthDivider />
-                <GoogleButton 
-                  onClick={handleGoogleLogin}
-                  isLoading={isLoading}
-                  isSignup={true}
-                />
-              </CardFooter>
             </Card>
           </TabsContent>
         </Tabs>
@@ -268,3 +229,4 @@ const Login = () => {
 };
 
 export default Login;
+
