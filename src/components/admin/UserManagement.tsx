@@ -30,6 +30,7 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
+  FormDescription,
 } from "@/components/ui/form"
 import { zodResolver } from "@hookform/resolvers/zod"
 import { useForm } from "react-hook-form"
@@ -44,7 +45,6 @@ import {
 import { Loader2 } from 'lucide-react';
 import { Checkbox } from "@/components/ui/checkbox"
 
-// Define the schema for creating a new user account
 const createUserFormSchema = z.object({
   name: z.string().min(2, {
     message: "Name must be at least 2 characters.",
@@ -66,7 +66,6 @@ const UserManagement = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
 
-  // Initialize form for creating user accounts
   const createForm = useForm<CreateUserFormData>({
     resolver: zodResolver(createUserFormSchema),
     defaultValues: {
@@ -78,7 +77,6 @@ const UserManagement = () => {
     },
   })
 
-  // Fetch users on component mount
   useEffect(() => {
     fetchUsers();
   }, []);
@@ -86,7 +84,6 @@ const UserManagement = () => {
   const fetchUsers = async () => {
     setIsLoading(true);
     try {
-      // Placeholder: Replace with actual API call to fetch users
       const mockUsers: User[] = [
         { id: '1', name: 'John Doe', email: 'john.doe@example.com', role: 'student', photoURL: '', phone: '', bio: '', studentId: '' },
         { id: '2', name: 'Jane Smith', email: 'jane.smith@example.com', role: 'teacher', photoURL: '', phone: '', bio: '', studentId: '' },
@@ -103,11 +100,9 @@ const UserManagement = () => {
     }
   };
 
-  // Function to handle creating a new user account
   const handleCreateAccount = async (data: CreateUserFormData) => {
     setIsLoading(true);
     try {
-      // Replace the direct authService call instead of using createUserAccount
       await authService.signup(
         data.email,
         data.password,
@@ -133,10 +128,8 @@ const UserManagement = () => {
     }
   };
 
-  // Function to handle resetting a user's password
   const handleResetPassword = async (email: string) => {
     try {
-      // Use authService.resetPassword instead of resetUserPassword
       await authService.resetPassword(email);
     
       toast({
@@ -152,7 +145,6 @@ const UserManagement = () => {
     }
   };
 
-  // Reset the create user form
   const resetCreateForm = () => {
     createForm.reset();
   };
@@ -163,7 +155,7 @@ const UserManagement = () => {
         <h2 className="text-2xl font-bold">User Management</h2>
         <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
           <DialogTrigger asChild>
-            <Button variant="primary">Create User</Button>
+            <Button variant="default">Create User</Button>
           </DialogTrigger>
           <DialogContent className="sm:max-w-[425px]">
             <DialogHeader>
