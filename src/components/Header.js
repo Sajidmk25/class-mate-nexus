@@ -22,25 +22,25 @@ const Header = () => {
 
   return (
     <>
-      <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-white shadow-md' : 'bg-transparent'}`}>
+      <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-white shadow-md' : 'bg-deep-blue'}`}>
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <Link to="/" className="flex items-center space-x-2 group">
             <div className="w-10 h-10 rounded-full bg-gradient-to-br from-deep-blue to-accent flex items-center justify-center relative overflow-hidden group-hover:scale-110 transition-all duration-300">
-              <span className="text-white font-bold">VC</span>
-              <div className="absolute inset-0 bg-white opacity-20 scale-y-0 group-hover:scale-y-100 transition-transform duration-300 origin-bottom"></div>
+              <span className="text-white font-bold">EC</span>
             </div>
-            <span className={`font-playfair font-bold text-xl transition-colors ${isScrolled ? 'text-deep-blue' : 'text-gray-800'}`}>
-              Virtual Classroom
+            <span className={`font-playfair font-bold text-xl transition-colors ${isScrolled ? 'text-deep-blue' : 'text-white'}`}>
+              EduConnect
             </span>
           </Link>
           
           <div className="hidden md:flex items-center space-x-8">
             <nav>
               <ul className="flex space-x-6">
-                <li><a href="#" className="text-gray-700 hover:text-deep-blue font-medium">Features</a></li>
-                <li><a href="#" className="text-gray-700 hover:text-deep-blue font-medium">Courses</a></li>
-                <li><a href="#" className="text-gray-700 hover:text-deep-blue font-medium">Resources</a></li>
-                <li><a href="#" className="text-gray-700 hover:text-deep-blue font-medium">About</a></li>
+                <li><a href="#" className={`${isScrolled ? 'text-gray-700' : 'text-white'} hover:text-deep-blue font-medium`}>Home</a></li>
+                <li><a href="#features" className={`${isScrolled ? 'text-gray-700' : 'text-white'} hover:text-deep-blue font-medium`}>Features</a></li>
+                <li><a href="#" className={`${isScrolled ? 'text-gray-700' : 'text-white'} hover:text-deep-blue font-medium`}>Pricing</a></li>
+                <li><a href="#" className={`${isScrolled ? 'text-gray-700' : 'text-white'} hover:text-deep-blue font-medium`}>About</a></li>
+                <li><a href="#" className={`${isScrolled ? 'text-gray-700' : 'text-white'} hover:text-deep-blue font-medium`}>Contact</a></li>
               </ul>
             </nav>
             
@@ -61,7 +61,7 @@ const Header = () => {
             ) : (
               <div className="flex space-x-4">
                 <Link to="/login">
-                  <button className="bg-deep-blue hover:bg-deep-blue/90 text-white px-4 py-2 rounded-lg transition-colors shadow-sm hover:shadow">
+                  <button className="bg-white hover:bg-white/90 text-deep-blue px-4 py-2 rounded-lg transition-colors shadow-sm hover:shadow">
                     Sign In
                   </button>
                 </Link>
@@ -71,7 +71,7 @@ const Header = () => {
           
           <div className="md:hidden">
             <button 
-              className="text-deep-blue p-2"
+              className={`${isScrolled ? 'text-deep-blue' : 'text-white'} p-2`}
               onClick={() => setIsMenuOpen(!isMenuOpen)}
             >
               {isMenuOpen ? (
@@ -92,10 +92,11 @@ const Header = () => {
           <div className="md:hidden bg-white shadow-lg">
             <nav className="py-4">
               <ul className="flex flex-col space-y-2 px-4">
-                <li><a href="#" className="block py-2 text-gray-700 hover:text-deep-blue font-medium">Features</a></li>
-                <li><a href="#" className="block py-2 text-gray-700 hover:text-deep-blue font-medium">Courses</a></li>
-                <li><a href="#" className="block py-2 text-gray-700 hover:text-deep-blue font-medium">Resources</a></li>
+                <li><a href="#" className="block py-2 text-gray-700 hover:text-deep-blue font-medium">Home</a></li>
+                <li><a href="#features" className="block py-2 text-gray-700 hover:text-deep-blue font-medium">Features</a></li>
+                <li><a href="#" className="block py-2 text-gray-700 hover:text-deep-blue font-medium">Pricing</a></li>
                 <li><a href="#" className="block py-2 text-gray-700 hover:text-deep-blue font-medium">About</a></li>
+                <li><a href="#" className="block py-2 text-gray-700 hover:text-deep-blue font-medium">Contact</a></li>
               </ul>
               
               <div className="mt-4 px-4 pt-4 border-t border-gray-200">

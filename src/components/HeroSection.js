@@ -1,8 +1,7 @@
 
 import { Link } from "react-router-dom";
-import { Button } from "@/components/ui/button";
-import { useAuth } from "@/context/AuthContext.jsx";
 import { useState } from "react";
+import { useAuth } from "../context/AuthContext.jsx";
 
 const HeroSection = () => {
   const { isAuthenticated, loginWithGoogle, logout } = useAuth();
@@ -24,14 +23,14 @@ const HeroSection = () => {
   };
   
   return (
-    <section className="container mx-auto px-4 py-20 md:py-32">
+    <section className="container mx-auto px-4 py-16 md:py-20">
       <div className="flex flex-col md:flex-row items-center justify-between gap-12">
         <div className="max-w-xl space-y-6">
           <span className="inline-block bg-deep-blue/10 text-deep-blue font-medium text-sm py-1 px-3 rounded-full">
             Learn from anywhere
           </span>
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-playfair font-bold leading-tight">
-            Engage in <span className="text-gradient bg-gradient-to-r from-deep-blue to-accent handwritten-underline">Virtual</span> Learning Experience
+            Welcome to <span className="text-gradient bg-gradient-to-r from-deep-blue to-accent handwritten-underline">EduConnect</span>
           </h1>
           <p className="text-lg text-gray-700 leading-relaxed">
             Join our interactive virtual classroom platform designed to make learning accessible, engaging, and effective in today's digital world.
@@ -41,41 +40,35 @@ const HeroSection = () => {
             {isAuthenticated ? (
               <>
                 <Link to="/dashboard" className="w-full sm:w-auto">
-                  <Button 
-                    size="lg" 
-                    className="w-full bg-deep-blue hover:bg-deep-blue/90 shadow-lg hover:shadow-xl transition-all duration-300"
+                  <button 
+                    className="w-full bg-deep-blue hover:bg-deep-blue/90 text-white px-6 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300"
                   >
                     Go to Dashboard
-                  </Button>
+                  </button>
                 </Link>
-                <Button 
-                  size="lg" 
+                <button 
                   onClick={handleLogout}
-                  variant="outline"
-                  className="w-full sm:w-auto border-deep-blue/20 text-deep-blue hover:bg-deep-blue/5"
+                  className="w-full sm:w-auto border border-deep-blue/20 text-deep-blue hover:bg-deep-blue/5 px-6 py-3 rounded-lg"
                 >
                   Logout
-                </Button>
+                </button>
               </>
             ) : (
               <>
                 <Link to="/login" className="w-full sm:w-auto">
-                  <Button 
-                    size="lg" 
-                    className="w-full bg-deep-blue hover:bg-deep-blue/90 shadow-lg hover:shadow-xl transition-all duration-300"
+                  <button 
+                    className="w-full bg-deep-blue hover:bg-deep-blue/90 text-white px-6 py-3 rounded-lg shadow-lg hover:shadow-xl transition-all duration-300"
                   >
                     Get Started
-                  </Button>
+                  </button>
                 </Link>
-                <Button 
-                  size="lg" 
-                  variant="outline"
-                  className="w-full sm:w-auto border-deep-blue/20 text-deep-blue hover:bg-deep-blue/5"
+                <button 
+                  className="w-full sm:w-auto border border-deep-blue/20 text-deep-blue hover:bg-deep-blue/5 px-6 py-3 rounded-lg"
                   onClick={handleGoogleLogin}
                   disabled={isLoading}
                 >
                   {isLoading ? "Signing in..." : "Sign in with Google"}
-                </Button>
+                </button>
               </>
             )}
           </div>
