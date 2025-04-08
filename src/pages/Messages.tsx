@@ -10,7 +10,7 @@ import { Badge } from "@/components/ui/badge";
 import { Label } from "@/components/ui/label";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
-import { Mic, Phone, Video, MoreVertical, Send, UserPlus, PlusCircle, Trash, X } from "lucide-react";
+import { Mic, Phone, Video, MoreVertical, Send, PlusCircle, Trash, X } from "lucide-react";
 import { useAuth } from "@/context/AuthContext";
 import AIAssistantButton from "@/components/AIAssistantButton";
 import { toast } from "@/hooks/use-toast";
@@ -40,8 +40,6 @@ const Messages = () => {
   const [showCreateGroup, setShowCreateGroup] = useState(false);
   const [groupName, setGroupName] = useState("");
   const [selectedMembers, setSelectedMembers] = useState<string[]>([]);
-  const [showAddContact, setShowAddContact] = useState(false);
-  const [newContactEmail, setNewContactEmail] = useState("");
   
   const handleSendMessage = () => {
     if (newMessage.trim() === "" || !activeContact) return;
@@ -123,43 +121,6 @@ const Messages = () => {
     });
   };
 
-  const addContactByEmail = () => {
-    if (newContactEmail.trim() === "") return;
-    
-    // In a real app, this would verify the email and add the contact
-    // For demo purposes, we'll create a mock contact
-    const contactName = newContactEmail.split('@')[0].split('.').map(
-      name => name.charAt(0).toUpperCase() + name.slice(1)
-    ).join(' ');
-    
-    if (messages[contactName]) {
-      toast({
-        title: "Contact already exists",
-        description: "This contact is already in your list.",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    const updatedMessages = {...messages};
-    updatedMessages[contactName] = [
-      { 
-        text: `Contact added via email: ${newContactEmail}`, 
-        sender: "user", 
-        timestamp: new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })
-      }
-    ];
-    
-    setMessages(updatedMessages);
-    setShowAddContact(false);
-    setNewContactEmail("");
-    
-    toast({
-      title: "Contact added",
-      description: `${contactName} has been added to your contacts.`,
-    });
-  };
-
   return (
     <Layout title="Messages">
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4 h-[calc(100vh-10rem)]">
@@ -172,38 +133,6 @@ const Messages = () => {
             <TabsContent value="direct" className="p-0 h-[calc(100vh-14rem)]">
               <div className="flex justify-between items-center p-3">
                 <h3 className="font-medium">Contacts</h3>
-                <Dialog open={showAddContact} onOpenChange={setShowAddContact}>
-                  <DialogTrigger asChild>
-                    <Button variant="ghost" size="sm">
-                      <UserPlus className="h-4 w-4" />
-                      <span className="ml-1">Add</span>
-                    </Button>
-                  </DialogTrigger>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Add Contact by Email</DialogTitle>
-                    </DialogHeader>
-                    <div className="space-y-4 py-4">
-                      <div className="space-y-2">
-                        <Label htmlFor="contact-email">Gmail Address</Label>
-                        <Input 
-                          id="contact-email" 
-                          type="email"
-                          placeholder="example@gmail.com" 
-                          value={newContactEmail}
-                          onChange={e => setNewContactEmail(e.target.value)}
-                        />
-                      </div>
-                      <Button 
-                        className="w-full" 
-                        onClick={addContactByEmail}
-                        disabled={newContactEmail.trim() === ""}
-                      >
-                        Add Contact
-                      </Button>
-                    </div>
-                  </DialogContent>
-                </Dialog>
               </div>
               <ScrollArea className="h-[calc(100vh-18rem)]">
                 <div className="space-y-2 p-2">
