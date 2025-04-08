@@ -55,6 +55,7 @@ router.get('/', async (req, res) => {
 
     // Filter based on role
     if (!isTeacher) {
+      // For students - show contacts where they're the recipient or the sender
       query = query.eq('student_id', req.user.id);
     }
     
@@ -77,27 +78,64 @@ router.get('/', async (req, res) => {
 // POST new contact
 router.post('/', async (req, res) => {
   try {
-    const { subject, message } = req.body;
+    // Get the user's role
+    const { data: profileData } = await supabase
+      .from('profile')
+      .select('role')
+      .eq('id', req.user.id)
+      .single();
+
+    const isTeacher = profileData?.role === 'teacher' || profileData?.role === 'admin';
     
-    if (!subject || !message) {
-      return res.status(400).json({ error: 'Subject and message are required' });
+    if (isTeacher) {
+      // Teacher creating a contact to student
+      const { student_id, subject, message } = req.body;
+      
+      if (!student_id || !subject || !message) {
+        return res.status(400).json({ error: 'Student ID, subject, and message are required' });
+      }
+      
+      // Insert the contact message
+      const { data, error } = await supabase
+        .from('student_contacts')
+        .insert({
+          student_id,
+          teacher_id: req.user.id,
+          subject,
+          message,
+          status: 'unread' // Mark as unread for student
+        });
+
+      if (error) {
+        console.error('Error inserting contact:', error);
+        return res.status(500).json({ error: 'Failed to save contact message' });
+      }
+
+      return res.json({ success: true, data });
+    } else {
+      // Student creating a contact
+      const { subject, message } = req.body;
+      
+      if (!subject || !message) {
+        return res.status(400).json({ error: 'Subject and message are required' });
+      }
+
+      // Insert the contact message
+      const { data, error } = await supabase
+        .from('student_contacts')
+        .insert({
+          student_id: req.user.id,
+          subject,
+          message
+        });
+
+      if (error) {
+        console.error('Error inserting contact:', error);
+        return res.status(500).json({ error: 'Failed to save contact message' });
+      }
+
+      return res.json({ success: true, data });
     }
-
-    // Insert the contact message
-    const { data, error } = await supabase
-      .from('student_contacts')
-      .insert({
-        student_id: req.user.id,
-        subject,
-        message
-      });
-
-    if (error) {
-      console.error('Error inserting contact:', error);
-      return res.status(500).json({ error: 'Failed to save contact message' });
-    }
-
-    return res.json({ success: true, data });
   } catch (error) {
     console.error('Unexpected error:', error);
     return res.status(500).json({ error: 'Internal server error' });

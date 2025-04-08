@@ -5,7 +5,6 @@ import { useApi } from "@/hooks/useApi";
 import Layout from "@/components/Layout";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { toast } from "@/hooks/use-toast";
-import ContactTeacherForm from "@/components/student/ContactTeacherForm";
 import ContactsList from "@/components/contacts/ContactsList";
 import ContactDetailDialog from "@/components/contacts/ContactDetailDialog";
 import { Contact } from "@/components/contacts/ContactDetailDialog";
@@ -86,22 +85,16 @@ const Contacts = () => {
   };
 
   return (
-    <Layout title={isTeacher ? "Student Contacts" : "Contact Teachers"}>
+    <Layout title={isTeacher ? "Student Contacts" : "Messages from Teachers"}>
       <div className="space-y-6">
-        {!isTeacher && (
-          <div className="mb-6">
-            <ContactTeacherForm />
-          </div>
-        )}
-
         {(isTeacher || contacts.length > 0) && (
           <Card>
             <CardHeader>
-              <CardTitle>{isTeacher ? "Student Messages" : "Your Messages"}</CardTitle>
+              <CardTitle>{isTeacher ? "Student Messages" : "Messages from Teachers"}</CardTitle>
               <CardDescription>
                 {isTeacher 
                   ? "View and respond to messages from students" 
-                  : "View your previous messages and their status"}
+                  : "View messages sent to you by teachers"}
               </CardDescription>
 
               <ContactsList 
