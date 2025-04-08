@@ -1,158 +1,84 @@
 
-@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;700&display=swap');
+/* Base styles */
+body {
+  font-family: 'Nunito', sans-serif;
+  background-color: #f3f8ff;
+  color: #333;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+}
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Playfair Display', serif;
+  font-weight: 700;
+  color: #2d3748;
+}
 
-@layer base {
-  :root {
-    --background: 210 40% 98%; /* Light blue background */
-    --foreground: 222 47% 11%; /* Dark gray text */
+a {
+  color: #3182ce;
+  text-decoration: none;
+}
 
-    --card: 0 0% 98%;
-    --card-foreground: 222 47% 11%;
+a:hover {
+  text-decoration: underline;
+}
 
-    --popover: 0 0% 98%;
-    --popover-foreground: 222 47% 11%;
+/* Loading spinner */
+.spinner {
+  border: 4px solid rgba(0, 0, 0, 0.1);
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  border-left-color: #3182ce;
+  animation: spin 1s linear infinite;
+  margin: 0 auto;
+}
 
-    --primary: 219 76% 40%; /* Deep blue */
-    --primary-foreground: 210 40% 98%;
-
-    --secondary: 142 69% 31%; /* Forest green */
-    --secondary-foreground: 210 40% 98%;
-
-    --muted: 220 14% 96%;
-    --muted-foreground: 220 9% 46%;
-
-    --accent: 33 95% 44%; /* Warm amber */
-    --accent-foreground: 210 40% 98%;
-
-    --destructive: 0 72% 51%; /* Soft red */
-    --destructive-foreground: 210 40% 98%;
-
-    --border: 220 13% 91%;
-    --input: 220 13% 91%;
-    --ring: 219 76% 40%;
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
   }
 }
 
-@layer base {
-  * {
-    @apply border-border;
-  }
-
-  body {
-    @apply bg-gradient-to-br from-[#f3f8ff] to-[#f0f7ee] text-dark-gray font-nunito;
-    min-height: 100vh;
-  }
-
-  h1, h2, h3, h4 {
-    font-family: 'Playfair Display', serif;
-    @apply font-bold text-dark-gray;
-  }
-
-  a {
-    @apply text-link-blue hover:underline;
-  }
-
-  .text-gradient {
-    @apply bg-gradient-to-r from-deep-blue via-deep-blue/80 to-deep-blue/60 bg-clip-text text-transparent;
-  }
-  
-  .text-gradient-header {
-    @apply bg-gradient-to-tl from-deep-blue/90 via-deep-blue to-deep-blue/80 bg-clip-text text-transparent;
-  }
-
-  /* Hand-drawn style elements */
-  .hand-drawn-border {
-    @apply relative before:absolute before:inset-0 before:border before:border-black/50 before:rounded-lg before:-rotate-1 before:scale-[1.02];
-  }
-  
-  .hand-drawn-button {
-    @apply relative overflow-hidden transition-all before:absolute before:inset-0 before:border before:border-current before:-rotate-[0.5deg] before:scale-[1.01] hover:before:scale-[1.03] hover:before:-rotate-1;
-  }
-
-  .sketchy-box {
-    @apply relative after:absolute after:top-[2px] after:left-[2px] after:w-full after:h-full after:bg-primary/10 after:rounded-lg after:-z-10;
-  }
-
-  .scattered-dots {
-    background-image: radial-gradient(circle, currentColor 1px, transparent 1px);
-    background-size: 16px 16px;
-  }
-
-  .chalk-text {
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
-    @apply tracking-wide;
-  }
+/* Utility classes */
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 1rem;
 }
 
-@layer components {
-  .feature-card {
-    @apply p-6 rounded-lg border border-border bg-white shadow-soft transition-all duration-300 hover:shadow-card hover:-translate-y-1 hover:border-deep-blue/20;
-  }
+.text-gradient {
+  background-image: linear-gradient(to right, #3182ce, #2c5282);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
 
-  .btn-primary {
-    @apply bg-deep-blue text-white px-4 py-2 rounded-md hover:bg-deep-blue/90 transition-colors;
-  }
+/* Button styles */
+button {
+  cursor: pointer;
+  font-family: 'Nunito', sans-serif;
+  transition: all 0.2s;
+}
 
-  .btn-secondary {
-    @apply bg-emerald text-white hover:bg-emerald/90 px-4 py-2 rounded-md transition-colors;
-  }
-  
-  .card-hover {
-    @apply transition-all duration-300 hover:shadow-card hover:border-deep-blue/30 hover:-translate-y-0.5;
-  }
+button:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
 
-  .glass-card {
-    @apply bg-white/70 backdrop-blur-sm border border-white/30 shadow-soft rounded-lg relative overflow-hidden;
-  }
-  
-  .glass-card::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -50%;
-    width: 150%;
-    height: 100%;
-    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-    transform: rotate(25deg);
-    pointer-events: none;
-  }
-  
-  .alert-warning {
-    @apply bg-amber/10 text-amber border-l-4 border-amber p-4 rounded;
-  }
-  
-  .alert-success {
-    @apply bg-emerald/10 text-emerald border-l-4 border-emerald p-4 rounded;
-  }
-  
-  .alert-error {
-    @apply bg-soft-red/10 text-soft-red border-l-4 border-soft-red p-4 rounded;
-  }
-  
-  .input-field {
-    @apply bg-white border border-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-deep-blue/30 focus:border-deep-blue/50;
-  }
-  
-  /* Custom staggered card effect */
-  .staggered-card-container {
-    @apply relative;
-  }
-  
-  .staggered-card {
-    @apply relative bg-white rounded-lg border border-border p-4 shadow-soft;
-  }
-  
-  .staggered-card:not(:first-child) {
-    @apply mt-[-3rem] pt-[3.5rem];
-  }
-  
-  /* Handwritten effect */
-  .handwritten {
-    font-family: 'Caveat', cursive;
-    @apply tracking-wide;
-  }
+/* Form styles */
+input, textarea, select {
+  font-family: 'Nunito', sans-serif;
+  font-size: 1rem;
+}
+
+/* Card style */
+.card {
+  background-color: white;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  padding: 1.5rem;
 }
