@@ -22,59 +22,108 @@ const Header = () => {
 
   return (
     <>
-      <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-white/90 shadow-md backdrop-blur-md' : 'bg-transparent'}`}>
+      <header className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${isScrolled ? 'bg-white shadow-md' : 'bg-transparent'}`}>
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
           <Link to="/" className="flex items-center space-x-2 group">
-            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-blue-600 to-blue-400 flex items-center justify-center relative overflow-hidden">
+            <div className="w-10 h-10 rounded-full bg-gradient-to-br from-deep-blue to-accent flex items-center justify-center relative overflow-hidden group-hover:scale-110 transition-all duration-300">
               <span className="text-white font-bold">VC</span>
+              <div className="absolute inset-0 bg-white opacity-20 scale-y-0 group-hover:scale-y-100 transition-transform duration-300 origin-bottom"></div>
             </div>
-            <span className={`font-bold text-xl transition-colors ${isScrolled ? 'text-blue-700' : 'text-gray-800'}`}>
+            <span className={`font-playfair font-bold text-xl transition-colors ${isScrolled ? 'text-deep-blue' : 'text-gray-800'}`}>
               Virtual Classroom
             </span>
           </Link>
           
-          <div className="md:hidden">
-            <button 
-              className="text-blue-700 p-2"
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-            >
-              {isMenuOpen ? "✕" : "☰"}
-            </button>
-          </div>
-
-          <div className={`md:flex items-center space-x-4 ${isMenuOpen ? 'absolute top-full left-0 right-0 bg-white shadow-md p-4 flex flex-col space-y-2' : 'hidden'}`}>
-            <button 
-              className="border border-blue-300 bg-white hover:bg-gray-50 text-blue-700 px-4 py-2 rounded"
-              onClick={() => alert("Support dialog would open here")}
-            >
-              Support Us
-            </button>
+          <div className="hidden md:flex items-center space-x-8">
+            <nav>
+              <ul className="flex space-x-6">
+                <li><a href="#" className="text-gray-700 hover:text-deep-blue font-medium">Features</a></li>
+                <li><a href="#" className="text-gray-700 hover:text-deep-blue font-medium">Courses</a></li>
+                <li><a href="#" className="text-gray-700 hover:text-deep-blue font-medium">Resources</a></li>
+                <li><a href="#" className="text-gray-700 hover:text-deep-blue font-medium">About</a></li>
+              </ul>
+            </nav>
             
             {isAuthenticated ? (
-              <div className="flex space-x-2">
+              <div className="flex space-x-4">
                 <Link to="/dashboard">
-                  <button className="border border-blue-300 bg-white hover:bg-gray-50 text-blue-700 px-4 py-2 rounded">
+                  <button className="bg-white text-deep-blue border border-deep-blue/20 hover:bg-deep-blue/5 px-4 py-2 rounded-lg transition-colors">
                     Dashboard
                   </button>
                 </Link>
                 <button 
                   onClick={handleLogout} 
-                  className="text-red-500 hover:bg-red-50 px-4 py-2 rounded flex items-center gap-2"
+                  className="text-soft-red hover:bg-soft-red/10 px-4 py-2 rounded-lg transition-colors"
                 >
                   Logout
                 </button>
               </div>
             ) : (
-              <div className="flex space-x-2">
+              <div className="flex space-x-4">
                 <Link to="/login">
-                  <button className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded">
+                  <button className="bg-deep-blue hover:bg-deep-blue/90 text-white px-4 py-2 rounded-lg transition-colors shadow-sm hover:shadow">
                     Sign In
                   </button>
                 </Link>
               </div>
             )}
           </div>
+          
+          <div className="md:hidden">
+            <button 
+              className="text-deep-blue p-2"
+              onClick={() => setIsMenuOpen(!isMenuOpen)}
+            >
+              {isMenuOpen ? (
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+              )}
+            </button>
+          </div>
         </div>
+        
+        {/* Mobile menu */}
+        {isMenuOpen && (
+          <div className="md:hidden bg-white shadow-lg">
+            <nav className="py-4">
+              <ul className="flex flex-col space-y-2 px-4">
+                <li><a href="#" className="block py-2 text-gray-700 hover:text-deep-blue font-medium">Features</a></li>
+                <li><a href="#" className="block py-2 text-gray-700 hover:text-deep-blue font-medium">Courses</a></li>
+                <li><a href="#" className="block py-2 text-gray-700 hover:text-deep-blue font-medium">Resources</a></li>
+                <li><a href="#" className="block py-2 text-gray-700 hover:text-deep-blue font-medium">About</a></li>
+              </ul>
+              
+              <div className="mt-4 px-4 pt-4 border-t border-gray-200">
+                {isAuthenticated ? (
+                  <div className="flex flex-col space-y-2">
+                    <Link to="/dashboard" className="w-full">
+                      <button className="w-full bg-white text-deep-blue border border-deep-blue/20 hover:bg-deep-blue/5 px-4 py-2 rounded-lg">
+                        Dashboard
+                      </button>
+                    </Link>
+                    <button 
+                      onClick={handleLogout} 
+                      className="w-full text-soft-red hover:bg-soft-red/10 px-4 py-2 rounded-lg"
+                    >
+                      Logout
+                    </button>
+                  </div>
+                ) : (
+                  <Link to="/login" className="w-full">
+                    <button className="w-full bg-deep-blue hover:bg-deep-blue/90 text-white px-4 py-2 rounded-lg">
+                      Sign In
+                    </button>
+                  </Link>
+                )}
+              </div>
+            </nav>
+          </div>
+        )}
       </header>
       <div className="py-16"></div> {/* Spacer for fixed header */}
     </>
