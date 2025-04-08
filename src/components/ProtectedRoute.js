@@ -1,10 +1,10 @@
 
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext.jsx';
+import { useAuth } from '../context/AuthContext.js';
 
-const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated, isLoading } = useAuth();
+const ProtectedRoute = ({ children, requireTeacher = false }) => {
+  const { isAuthenticated, isLoading, isTeacher } = useAuth();
 
   // Show loading state while checking authentication
   if (isLoading) {
@@ -22,8 +22,13 @@ const ProtectedRoute = ({ children }) => {
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
   }
+  
+  // Redirect to dashboard if teacher access is required but user is not a teacher
+  if (requireTeacher && !isTeacher) {
+    return <Navigate to="/dashboard" replace />;
+  }
 
-  // Render children if authenticated
+  // Render children if authenticated and authorized
   return children;
 };
 
