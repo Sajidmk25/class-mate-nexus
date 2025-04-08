@@ -25,12 +25,12 @@ const HeroSection = () => {
   };
   
   return (
-    <section className="container mx-auto px-4 py-10 md:py-16">
-      <div className="max-w-3xl mx-auto text-center mb-10">
-        <h1 className="text-3xl md:text-4xl font-bold mb-4">
+    <section className="container mx-auto px-4 py-20">
+      <div className="max-w-lg mx-auto text-center">
+        <h1 className="text-4xl font-bold mb-4">
           Virtual Classroom
         </h1>
-        <p className="text-lg text-gray-700 mb-6">
+        <p className="text-xl text-gray-600 mb-8">
           Modern education in a digital world
         </p>
         
@@ -40,19 +40,19 @@ const HeroSection = () => {
               <Link to="/dashboard">
                 <Button 
                   size="lg" 
-                  className="w-full sm:w-auto bg-deep-blue text-white flex items-center gap-2"
+                  className="w-full sm:w-auto"
                 >
                   Dashboard
-                  <ArrowRight className="h-4 w-4" />
+                  <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
               <Button 
                 size="lg" 
                 onClick={handleLogout}
                 variant="outline"
-                className="w-full sm:w-auto border-deep-blue/20 text-dark-gray"
+                className="w-full sm:w-auto"
               >
-                <LogOut className="h-4 w-4 mr-2" />
+                <LogOut className="mr-2 h-4 w-4" />
                 Logout
               </Button>
             </>
@@ -61,7 +61,7 @@ const HeroSection = () => {
               <Link to="/login" className="w-full sm:w-auto">
                 <Button 
                   size="lg" 
-                  className="w-full bg-deep-blue text-white"
+                  className="w-full"
                 >
                   Get Started
                 </Button>
