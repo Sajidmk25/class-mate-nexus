@@ -122,33 +122,7 @@ const HeroSection = () => {
           </div>
         </div>
       </div>
-      
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-        {[
-          {
-            title: "Interactive Learning",
-            description: "Engage with dynamic content and real-time feedback to master concepts faster.",
-            icon: "✨"
-          },
-          {
-            title: "Expert Instructors",
-            description: "Learn from qualified educators passionate about their subjects and your success.",
-            icon: "👨‍🏫"
-          },
-          {
-            title: "Flexible Schedule",
-            description: "Access courses anytime, anywhere to fit learning into your busy lifestyle.",
-            icon: "🕒"
-          }
-        ].map((feature, idx) => (
-          <div key={idx} className="feature-card relative">
-            <div className="text-3xl mb-4">{feature.icon}</div>
-            <h3 className="text-xl font-bold mb-2">{feature.title}</h3>
-            <p className="text-gray-600">{feature.description}</p>
-            <div className="absolute top-0 right-0 w-20 h-20 bg-deep-blue/5 rounded-bl-3xl -z-10"></div>
-          </div>
-        ))}
-      </div>
+      {/* Removed the feature cards section */}
     </section>
   );
 };
