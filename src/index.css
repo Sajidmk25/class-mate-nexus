@@ -1,5 +1,5 @@
 
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;500;600;700&family=Playfair+Display:wght@400;500;700&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -16,16 +16,16 @@
     --popover: 0 0% 98%;
     --popover-foreground: 222 47% 11%;
 
-    --primary: 215 70% 35%; /* Deep blue */
+    --primary: 219 76% 40%; /* Deep blue */
     --primary-foreground: 210 40% 98%;
 
-    --secondary: 155 65% 35%; /* Emerald */
+    --secondary: 142 69% 31%; /* Forest green */
     --secondary-foreground: 210 40% 98%;
 
     --muted: 220 14% 96%;
     --muted-foreground: 220 9% 46%;
 
-    --accent: 24 90% 40%; /* Amber */
+    --accent: 33 95% 44%; /* Warm amber */
     --accent-foreground: 210 40% 98%;
 
     --destructive: 0 72% 51%; /* Soft red */
@@ -33,7 +33,7 @@
 
     --border: 220 13% 91%;
     --input: 220 13% 91%;
-    --ring: 215 70% 35%; /* Deep blue */
+    --ring: 219 76% 40%;
   }
 }
 
@@ -43,8 +43,7 @@
   }
 
   body {
-    @apply bg-off-white text-dark-gray font-inter;
-    background: linear-gradient(135deg, rgba(230, 242, 255, 0.5), rgba(240, 247, 238, 0.5));
+    @apply bg-gradient-to-br from-[#f3f8ff] to-[#f0f7ee] text-dark-gray font-nunito;
     min-height: 100vh;
   }
 
@@ -62,13 +61,36 @@
   }
   
   .text-gradient-header {
-    @apply bg-gradient-to-r from-deep-blue/90 via-deep-blue to-deep-blue/80 bg-clip-text text-transparent;
+    @apply bg-gradient-to-tl from-deep-blue/90 via-deep-blue to-deep-blue/80 bg-clip-text text-transparent;
+  }
+
+  /* Hand-drawn style elements */
+  .hand-drawn-border {
+    @apply relative before:absolute before:inset-0 before:border before:border-black/50 before:rounded-lg before:-rotate-1 before:scale-[1.02];
+  }
+  
+  .hand-drawn-button {
+    @apply relative overflow-hidden transition-all before:absolute before:inset-0 before:border before:border-current before:-rotate-[0.5deg] before:scale-[1.01] hover:before:scale-[1.03] hover:before:-rotate-1;
+  }
+
+  .sketchy-box {
+    @apply relative after:absolute after:top-[2px] after:left-[2px] after:w-full after:h-full after:bg-primary/10 after:rounded-lg after:-z-10;
+  }
+
+  .scattered-dots {
+    background-image: radial-gradient(circle, currentColor 1px, transparent 1px);
+    background-size: 16px 16px;
+  }
+
+  .chalk-text {
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.2);
+    @apply tracking-wide;
   }
 }
 
 @layer components {
   .feature-card {
-    @apply p-6 rounded-lg border border-border bg-white shadow-soft transition-all duration-300 hover:shadow-card hover:border-deep-blue/20;
+    @apply p-6 rounded-lg border border-border bg-white shadow-soft transition-all duration-300 hover:shadow-card hover:-translate-y-1 hover:border-deep-blue/20;
   }
 
   .btn-primary {
@@ -80,11 +102,23 @@
   }
   
   .card-hover {
-    @apply transition-all duration-300 hover:shadow-card hover:border-deep-blue/30;
+    @apply transition-all duration-300 hover:shadow-card hover:border-deep-blue/30 hover:-translate-y-0.5;
   }
 
   .glass-card {
-    @apply bg-white/70 backdrop-blur-sm border border-white/30 shadow-soft;
+    @apply bg-white/70 backdrop-blur-sm border border-white/30 shadow-soft rounded-lg relative overflow-hidden;
+  }
+  
+  .glass-card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -50%;
+    width: 150%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+    transform: rotate(25deg);
+    pointer-events: none;
   }
   
   .alert-warning {
@@ -101,5 +135,24 @@
   
   .input-field {
     @apply bg-white border border-border rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-deep-blue/30 focus:border-deep-blue/50;
+  }
+  
+  /* Custom staggered card effect */
+  .staggered-card-container {
+    @apply relative;
+  }
+  
+  .staggered-card {
+    @apply relative bg-white rounded-lg border border-border p-4 shadow-soft;
+  }
+  
+  .staggered-card:not(:first-child) {
+    @apply mt-[-3rem] pt-[3.5rem];
+  }
+  
+  /* Handwritten effect */
+  .handwritten {
+    font-family: 'Caveat', cursive;
+    @apply tracking-wide;
   }
 }

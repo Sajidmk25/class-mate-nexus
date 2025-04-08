@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -19,7 +20,7 @@ export default {
     },
     extend: {
       fontFamily: {
-        inter: ['Inter', 'sans-serif'],
+        nunito: ['Nunito', 'sans-serif'],
         playfair: ['Playfair Display', 'serif'],
       },
       colors: {
@@ -28,21 +29,21 @@ export default {
         'off-white': '#F8F9FA',
         'light-gray': '#F1F3F5',
         
-        'deep-blue': '#2C5282',
-        'emerald': '#199473',
-        'amber': '#D97706',
-        'soft-red': '#E53E3E',
+        'deep-blue': '#1E4D8C',
+        'emerald': '#175E54',
+        'amber': '#B25D18',
+        'soft-red': '#D73F3F',
         
         'dark-gray': '#2D3748',
         'mid-gray': '#718096',
-        'link-blue': '#3182CE',
+        'link-blue': '#2668B2',
         
         'brand-white': '#FFFFFF',
         'brand-black': '#000000E6',
         'brand-red': {
-          DEFAULT: '#EA384C',
-          dark: '#C62828',
-          light: '#FF5252'
+          DEFAULT: '#E34747',
+          dark: '#C22A2A',
+          light: '#FF5E5E'
         },
         
         border: 'hsl(var(--border))',
@@ -80,9 +81,9 @@ export default {
         },
       },
       borderRadius: {
-        lg: 'var(--radius)',
-        md: 'calc(var(--radius) - 2px)',
-        sm: 'calc(var(--radius) - 4px)'
+        lg: '0.75rem',
+        md: '0.5rem',
+        sm: '0.25rem'
       },
       keyframes: {
         'accordion-down': {
@@ -126,6 +127,14 @@ export default {
           '50%': {
             transform: 'translateY(-10px)'
           }
+        },
+        'shimmer': {
+          '0%': { 
+            backgroundPosition: '-200% 0' 
+          },
+          '100%': { 
+            backgroundPosition: '200% 0' 
+          },
         }
       },
       animation: {
@@ -133,13 +142,20 @@ export default {
         'accordion-up': 'accordion-up 0.2s ease-out',
         'fade-in': 'fade-in 0.3s ease-out',
         'pulse-light': 'pulse-light 3s infinite ease-in-out',
-        'float': 'float 6s infinite ease-in-out'
+        'float': 'float 6s infinite ease-in-out',
+        'shimmer': 'shimmer 2s infinite linear'
       },
       boxShadow: {
-        'glow': '0 0 20px rgba(139, 92, 246, 0.3)',
-        'soft': '0 4px 6px rgba(0, 0, 0, 0.05)',
-        'card': '0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.03)',
-      }
+        'glow': '0 0 20px rgba(30, 77, 140, 0.3)',
+        'soft': '0 4px 10px rgba(0, 0, 0, 0.05)',
+        'card': '0 10px 15px -3px rgba(0, 0, 0, 0.07), 0 4px 6px -2px rgba(0, 0, 0, 0.04)',
+        'inset': 'inset 0 2px 4px 0 rgba(0, 0, 0, 0.06)',
+      },
+      backgroundImage: {
+        'hero-pattern': "url('/path/to/hero-pattern.svg')",
+        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
+        'gradient-shimmer': 'linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0) 100%)',
+      },
     }
   },
   plugins: [require("tailwindcss-animate")],
