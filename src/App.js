@@ -1,5 +1,5 @@
 
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./context/AuthContext.jsx";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
@@ -13,15 +13,6 @@ import ProtectedRoute from "./components/ProtectedRoute";
 
 const queryClient = new QueryClient();
 
-// Simple component wrapper for ProtectedRoutes
-function ProtectedWrapper({ element }) {
-  return (
-    <ProtectedRoute>
-      {element}
-    </ProtectedRoute>
-  );
-}
-
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <AuthProvider>
@@ -29,8 +20,16 @@ const App = () => (
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/login" element={<Login />} />
-          <Route path="/dashboard" element={<ProtectedWrapper element={<Dashboard />} />} />
-          <Route path="/courses" element={<ProtectedWrapper element={<Courses />} />} />
+          <Route path="/dashboard" element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          } />
+          <Route path="/courses" element={
+            <ProtectedRoute>
+              <Courses />
+            </ProtectedRoute>
+          } />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
