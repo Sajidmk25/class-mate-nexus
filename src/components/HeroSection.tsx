@@ -122,7 +122,6 @@ const HeroSection = () => {
           </div>
         </div>
       </div>
-      {/* Removed the feature cards section */}
     </section>
   );
 };
