@@ -89,6 +89,15 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     }
   };
 
+  // Adding a no-op function for loginWithGoogle to satisfy the TypeScript interface
+  const loginWithGoogle = async () => {
+    toast({
+      title: "Google login unavailable",
+      description: "This feature has been disabled.",
+      variant: "destructive",
+    });
+  };
+
   const value = {
     user,
     supabaseUser,
@@ -100,8 +109,8 @@ export const AuthProvider = ({ children }: AuthProviderProps) => {
     isAuthenticated: !!session,
     isLoading: isLoading || updatingProfile,
     isTeacher: user?.role === 'teacher',
+    loginWithGoogle, // Add this to satisfy the TypeScript interface
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
-

@@ -5,27 +5,18 @@ import { useAuth } from "@/context/AuthContext";
 import { LogOut } from "lucide-react";
 import { useState } from "react";
 import DonationDialog from "./DonationDialog";
+
 const Header = () => {
   const {
     isAuthenticated,
-    loginWithGoogle,
     logout
   } = useAuth();
   const [isDonationOpen, setIsDonationOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const handleGoogleLogin = async () => {
-    setIsLoading(true);
-    try {
-      await loginWithGoogle();
-    } catch (error) {
-      console.error("Google login failed:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+
   const handleLogout = async () => {
     await logout();
   };
+
   return <>
       <header className="bg-background/50 backdrop-blur-md border-b border-white/10">
         <div className="container mx-auto px-4 py-4 flex justify-between items-center">
@@ -48,9 +39,6 @@ const Header = () => {
                 <Link to="/login">
                   <Button variant="outline" className="border-white/20 hover:bg-white/10">Login</Button>
                 </Link>
-                <Button onClick={handleGoogleLogin} disabled={isLoading} className="flex items-center gap-2">
-                  {isLoading ? "Signing in..." : "Sign in with Google"}
-                </Button>
               </div>}
           </div>
         </div>
@@ -59,4 +47,5 @@ const Header = () => {
       <DonationDialog isOpen={isDonationOpen} onOpenChange={setIsDonationOpen} />
     </>;
 };
+
 export default Header;
